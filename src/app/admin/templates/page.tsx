@@ -192,7 +192,7 @@ export default function TemplateListPage() {
                 {/* Header */}
                 <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-xl font-extrabold tracking-tight text-foreground">Templates</h1>
+                        <h1 className="text-xl font-extrabold tracking-tight text-foreground">Invitation Templates</h1>
                         <p className="text-xs text-muted-foreground">
                             Design, manage and organize your event invitation templates.
                         </p>

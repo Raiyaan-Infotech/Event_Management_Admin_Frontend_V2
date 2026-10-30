@@ -53,6 +53,7 @@ import {
   FileEdit,
   Type,
   ClipboardList,
+  Smartphone,
 } from "lucide-react";
 import {
   Sidebar,
@@ -156,11 +157,13 @@ const menuItems: MenuItem[] = [
     // triangle that reveals nothing. It is a group now that there are genuinely
     // three separate things behind it, each with its own permission. "Create
     // Template" is still only the button at the top of the list, not a child.
-    labelKey: "Templates",
+    // Renamed "Templates" → "Invitation" (Jamal, 2026-10-30); "Template" is
+    // now the mobile app home screen designs below. Routes unchanged.
+    labelKey: "Invitation",
     icon: LayoutTemplate,
     children: [
       {
-        labelKey: "All Templates",
+        labelKey: "All Invitations",
         href: "/admin/templates",
         icon: LayoutTemplate,
         permission: "event_templates.view",
@@ -196,6 +199,19 @@ const menuItems: MenuItem[] = [
         href: "/admin/templates/fonts",
         icon: Type,
         permission: "event_templates.view",
+      },
+    ],
+  },
+  {
+    // Mobile app home screen designs per event category (2026-10-30).
+    labelKey: "Template",
+    icon: Smartphone,
+    children: [
+      {
+        labelKey: "Home Screen Templates",
+        href: "/admin/home-screen-templates",
+        icon: Smartphone,
+        permission: "home_screen_templates.view",
       },
     ],
   },

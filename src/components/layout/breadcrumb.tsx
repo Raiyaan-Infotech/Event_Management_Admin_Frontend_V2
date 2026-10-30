@@ -80,8 +80,10 @@ export default function Breadcrumb() {
      * always read as "Email Templates" — the label the FIRST one owns.
      */
     if (segment === "templates" && segments[index - 1] !== "settings") {
-      return t("nav.templates", "Templates");
+      return "Invitation";
     }
+
+    if (segment === "home-screen-templates") return "Home Screen Templates";
 
     const translationKey = segmentTranslationMap[segment];
 

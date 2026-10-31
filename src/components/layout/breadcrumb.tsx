@@ -84,6 +84,7 @@ export default function Breadcrumb() {
     }
 
     if (segment === "home-screen-templates") return "Home Screen Templates";
+    if (segment === "categories" && segments[index - 1] === "home-screen-templates") return "Home Screen Categories";
 
     const translationKey = segmentTranslationMap[segment];
 

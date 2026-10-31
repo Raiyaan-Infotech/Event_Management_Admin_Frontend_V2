@@ -213,6 +213,13 @@ const menuItems: MenuItem[] = [
         icon: Smartphone,
         permission: "home_screen_templates.view",
       },
+      {
+        // The style master those templates are grouped by (2026-10-31).
+        labelKey: "Home Screen Categories",
+        href: "/admin/home-screen-templates/categories",
+        icon: Folder,
+        permission: "home_screen_categories.view",
+      },
     ],
   },
   {

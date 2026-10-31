@@ -31,7 +31,7 @@ export interface HomeScreenTemplate {
     name: string;
     description: string | null;
     event_category_id: number | null;
-    template_category_id: number | null;
+    home_screen_category_id: number | null;
     image_url: string | null;
     image_name: string | null;
     image_size: number | null;
@@ -60,7 +60,7 @@ export type HomeScreenTemplatePayload = {
     name: string;
     description: string;
     event_category_id: number;
-    template_category_id: number;
+    home_screen_category_id: number;
     image_url: string;
     image_name?: string | null;
     image_size?: number | null;

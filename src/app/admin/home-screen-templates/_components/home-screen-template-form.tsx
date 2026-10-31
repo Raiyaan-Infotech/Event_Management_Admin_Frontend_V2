@@ -25,7 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import { mediaApi } from '@/hooks/use-media';
 import { useEventCategories } from '@/hooks/use-menu-management';
-import { useTemplateCategories } from '@/hooks/use-template-categories';
+import { useHomeScreenCategories } from '@/hooks/use-home-screen-categories';
 import {
     COLOR_ROLES,
     normaliseHex,
@@ -56,7 +56,7 @@ type FormState = {
     name: string;
     description: string;
     event_category_id: string;
-    template_category_id: string;
+    home_screen_category_id: string;
     image_url: string;
     image_name: string;
     image_size: number | null;
@@ -73,7 +73,7 @@ const fromInitial = (row?: HomeScreenTemplate | null): FormState => {
         name: row?.name ?? '',
         description: row?.description ?? '',
         event_category_id: row?.event_category_id ? String(row.event_category_id) : '',
-        template_category_id: row?.template_category_id ? String(row.template_category_id) : '',
+        home_screen_category_id: row?.home_screen_category_id ? String(row.home_screen_category_id) : '',
         image_url: row?.image_url ?? '',
         image_name: row?.image_name ?? '',
         image_size: row?.image_size ?? null,
@@ -110,7 +110,7 @@ export function HomeScreenTemplateForm({ initial }: { initial?: HomeScreenTempla
     useEffect(() => () => { if (localUrl) URL.revokeObjectURL(localUrl); }, [localUrl]);
 
     const { data: eventCategories } = useEventCategories({ limit: 200, is_active: 1 });
-    const { data: styles, isLoading: stylesLoading } = useTemplateCategories({ limit: 200, is_active: 1 });
+    const { data: styles, isLoading: stylesLoading } = useHomeScreenCategories({ limit: 200, is_active: 1 });
 
     const backToList = () => router.push(LIST);
     const createTpl = useCreateHomeScreenTemplate(backToList);
@@ -191,7 +191,7 @@ export function HomeScreenTemplateForm({ initial }: { initial?: HomeScreenTempla
             name: !form.name.trim(),
             description: !form.description.trim(),
             event_category_id: !form.event_category_id,
-            template_category_id: !form.template_category_id,
+            home_screen_category_id: !form.home_screen_category_id,
             image_url: !form.image_url,
         };
         activeRoles.forEach((r) => { next[`hex_${r.key}`] = !normaliseHex(form.hex[r.key]); });
@@ -208,7 +208,7 @@ export function HomeScreenTemplateForm({ initial }: { initial?: HomeScreenTempla
             name: form.name.trim(),
             description: form.description.trim(),
             event_category_id: Number(form.event_category_id),
-            template_category_id: Number(form.template_category_id),
+            home_screen_category_id: Number(form.home_screen_category_id),
             image_url: form.image_url,
             image_name: form.image_name || null,
             image_size: form.image_size,
@@ -281,8 +281,8 @@ export function HomeScreenTemplateForm({ initial }: { initial?: HomeScreenTempla
                             </div>
                             <div className="min-w-0">
                                 <StepLabel n={4} required>Template Style</StepLabel>
-                                <Select value={form.template_category_id} onValueChange={(v) => setField('template_category_id', v)}>
-                                    <SelectTrigger className={errors.template_category_id ? 'border-destructive' : ''}>
+                                <Select value={form.home_screen_category_id} onValueChange={(v) => setField('home_screen_category_id', v)}>
+                                    <SelectTrigger className={errors.home_screen_category_id ? 'border-destructive' : ''}>
                                         <SelectValue placeholder="Select template style" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -297,9 +297,9 @@ export function HomeScreenTemplateForm({ initial }: { initial?: HomeScreenTempla
                                         <button
                                             type="button"
                                             className="font-semibold text-primary hover:underline"
-                                            onClick={() => router.push('/admin/templates/categories')}
+                                            onClick={() => router.push('/admin/home-screen-templates/categories')}
                                         >
-                                            add one in Invitation → Template Categories
+                                            add one in Template → Home Screen Categories
                                         </button>
                                     </p>
                                 ) : null}

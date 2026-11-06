@@ -113,12 +113,12 @@ export default function ViewMenuPage({ params }: { params: Promise<{ id: string 
                                     />
                                 </div>
                                 <div className="space-y-4">
-                                    <p className="text-sm font-semibold text-foreground">Plan Default</p>
+                                    <p className="text-sm font-semibold text-foreground">Menu Type</p>
                                     <StateRow
-                                        label="New plans"
+                                        label="Type"
                                         on={Number(menu.is_default) === 1}
                                         onText="Default Menu"
-                                        offText="Add-on Feature"
+                                        offText="Add-on Menu"
                                     />
                                 </div>
                             </div>

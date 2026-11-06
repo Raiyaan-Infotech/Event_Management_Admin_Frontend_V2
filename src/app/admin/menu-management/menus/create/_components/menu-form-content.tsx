@@ -373,22 +373,47 @@ export function MenuFormContent() {
                                 Default: every plan grants it and no event can
                                 switch it off. Add-on: optional on a plan,
                                 switchable per event. */}
+                            {/* Menu Type as two clear choices (Jamal, 2026-11-06: the small "Plan
+                                Default" switch read as missing). Same words as the list's
+                                Menu Type filter. Default also grants the menu to every plan. */}
                             <div className="rounded-lg border border-border bg-card p-4">
-                                <p className="text-sm font-semibold text-foreground">Plan Default</p>
+                                <p className="text-sm font-semibold text-foreground">
+                                    Menu Type <span className="text-destructive">*</span>
+                                </p>
                                 <p className="mb-3 text-xs text-muted-foreground">
                                     Default menus are on every plan and every event. Add-ons are chosen per plan and switched per event.
                                 </p>
-                                <StatusRow
-                                    icon={<Star className="h-4 w-4" />}
-                                    title={form.is_default ? 'Default Menu' : 'Add-on Feature'}
-                                    subtitle={
-                                        form.is_default
-                                            ? 'Always included — every plan, every event'
-                                            : 'Optional — plans add it, events can switch it off'
-                                    }
-                                    checked={form.is_default}
-                                    onChange={(v) => setField('is_default', v)}
-                                />
+                                <div role="radiogroup" aria-label="Menu Type" className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                    {([
+                                        { value: true, title: 'Default Menu', text: 'Always included — every plan, every event' },
+                                        { value: false, title: 'Add-on Menu', text: 'Optional — plans add it, events can switch it off' },
+                                    ] as const).map((o) => {
+                                        const on = form.is_default === o.value;
+                                        return (
+                                            <button
+                                                key={o.title}
+                                                type="button"
+                                                role="radio"
+                                                aria-checked={on}
+                                                onClick={() => setField('is_default', o.value)}
+                                                className={cn(
+                                                    'flex items-start gap-2.5 rounded-lg border p-3 text-left transition',
+                                                    on ? 'border-primary bg-primary/5 ring-1 ring-primary/30' : 'border-border hover:bg-muted/50'
+                                                )}
+                                            >
+                                                <span className={cn('mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border-2', on ? 'border-primary' : 'border-muted-foreground/40')}>
+                                                    {on && <span className="h-2 w-2 rounded-full bg-primary" />}
+                                                </span>
+                                                <span className="min-w-0">
+                                                    <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                                                        {o.value && <Star className="h-3.5 w-3.5 text-primary" />} {o.title}
+                                                    </span>
+                                                    <span className="block text-xs text-muted-foreground">{o.text}</span>
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
 

@@ -54,6 +54,9 @@ import {
   Type,
   ClipboardList,
   Smartphone,
+  CalendarClock,
+  CalendarDays,
+  CalendarRange,
 } from "lucide-react";
 import {
   Sidebar,
@@ -220,6 +223,16 @@ const menuItems: MenuItem[] = [
         icon: Folder,
         permission: "home_screen_categories.view",
       },
+    ],
+  },
+  {
+    // Daily event limits per date (2026-11-12): Daily Booking list, configs, special limit overrides.
+    labelKey: "Event Availability",
+    icon: CalendarClock,
+    children: [
+      { labelKey: "Daily Booking", href: "/admin/event-availability", icon: CalendarDays, permission: "event_availability.view" },
+      { labelKey: "Availability Configs", href: "/admin/event-availability/configs", icon: Settings, permission: "event_availability.view" },
+      { labelKey: "Special Limits Override", href: "/admin/event-availability/overrides", icon: CalendarRange, permission: "event_availability.view" },
     ],
   },
   {

@@ -268,7 +268,7 @@ export function OverridesContent() {
             </div>
 
             <SectionCard icon={<ListChecks />} title="Special Limits Override List" action={
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex shrink-0 flex-nowrap items-center gap-2">
                     {isFetching && !isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                     <div className="relative w-60 shrink-0">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

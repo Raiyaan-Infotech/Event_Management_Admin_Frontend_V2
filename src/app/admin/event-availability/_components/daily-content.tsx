@@ -79,11 +79,11 @@ export function DailyContent() {
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_1.3fr_auto] xl:items-end">
                     <div>
                         <p className="mb-1 text-[13px] font-medium">From</p>
-                        <div className="[&_button]:w-full [&>div]:w-full"><DatePicker value={from} onChange={(v) => { setFrom(v); setPage(1); }} /></div>
+                        <div className="[&_button]:w-full [&>div]:w-full [&_.inline-block]:!block [&_.inline-block]:w-full"><DatePicker value={from} onChange={(v) => { setFrom(v); setPage(1); }} /></div>
                     </div>
                     <div>
                         <p className="mb-1 text-[13px] font-medium">To</p>
-                        <div className="[&_button]:w-full [&>div]:w-full"><DatePicker value={to} onChange={(v) => { setTo(v); setPage(1); }} /></div>
+                        <div className="[&_button]:w-full [&>div]:w-full [&_.inline-block]:!block [&_.inline-block]:w-full"><DatePicker value={to} onChange={(v) => { setTo(v); setPage(1); }} /></div>
                     </div>
                     <div>
                         <p className="mb-1 text-[13px] font-medium">Category</p>

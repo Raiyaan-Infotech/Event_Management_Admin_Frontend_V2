@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-    Activity, BarChart3, CalendarClock, CalendarDays, CheckCircle2, CircleSlash, Clock, Copy, Eye, FileText, Filter, Info,
+    Activity, BarChart3, CalendarClock, CalendarDays, CheckCircle2, CircleSlash, Clock, Copy, Eye, FileText, Info,
     Layers, ListChecks, Loader2, MoreVertical, Pencil, PlusCircle, Save, Scale, Search, Trash2, User,
 } from "lucide-react";
 import { PageLoader } from "@/components/common/page-loader";
@@ -134,8 +134,8 @@ function FormFields({ form, configs, stacked }: { form: ReturnType<typeof useOve
                 </div>
             </div>
             <div className={f.range ? "grid grid-cols-2 gap-2" : ""}>
-                <div><FieldLabel required>{f.range ? "From" : "Date"}</FieldLabel><div className="[&_button]:w-full [&>div]:w-full"><DatePicker value={f.start_date} onChange={(v) => set("start_date", v)} /></div></div>
-                {f.range && <div><FieldLabel required>To</FieldLabel><div className="[&_button]:w-full [&>div]:w-full"><DatePicker value={f.end_date} onChange={(v) => set("end_date", v)} /></div></div>}
+                <div><FieldLabel required>{f.range ? "From" : "Date"}</FieldLabel><div className="[&_button]:w-full [&>div]:w-full [&_.inline-block]:!block [&_.inline-block]:w-full"><DatePicker value={f.start_date} onChange={(v) => set("start_date", v)} /></div></div>
+                {f.range && <div><FieldLabel required>To</FieldLabel><div className="[&_button]:w-full [&>div]:w-full [&_.inline-block]:!block [&_.inline-block]:w-full"><DatePicker value={f.end_date} onChange={(v) => set("end_date", v)} /></div></div>}
             </div>
             <div>
                 <FieldLabel required>Override Type</FieldLabel>
@@ -268,14 +268,14 @@ export function OverridesContent() {
             </div>
 
             <SectionCard icon={<ListChecks />} title="Special Limits Override List" action={
-                <div className="flex flex-nowrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     {isFetching && !isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                    <div className="relative w-56">
+                    <div className="relative w-60 shrink-0">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input className="h-9 pl-9" placeholder="Search date, reason, status..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
                     </div>
                     <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-                        <SelectTrigger className="h-9 w-36"><Filter className="mr-1.5 h-4 w-4" /><SelectValue>{{ all: "All Statuses", active: "Active", inactive: "Inactive" }[status]}</SelectValue></SelectTrigger>
+                        <SelectTrigger className="h-9 w-36 shrink-0"><SelectValue>{{ all: "All Statuses", active: "Active", inactive: "Inactive" }[status]}</SelectValue></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Statuses</SelectItem>
                             <SelectItem value="active">Active</SelectItem>

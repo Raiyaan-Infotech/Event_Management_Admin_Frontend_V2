@@ -151,12 +151,12 @@ export function ConfigForm({ id }: { id?: number }) {
                             </div>
                             <div>
                                 <FieldLabel required>Start Date</FieldLabel>
-                                <div className="[&_button]:w-full [&>div]:w-full"><DatePicker value={f.start_date} onChange={(v) => set("start_date", v)} /></div>
+                                <div className="[&_button]:w-full [&>div]:w-full [&_.inline-block]:!block [&_.inline-block]:w-full"><DatePicker value={f.start_date} onChange={(v) => set("start_date", v)} /></div>
                                 {err("start_date")}
                             </div>
                             <div>
                                 <FieldLabel required>End Date</FieldLabel>
-                                <div className="[&_button]:w-full [&>div]:w-full"><DatePicker value={f.end_date} onChange={(v) => set("end_date", v)} /></div>
+                                <div className="[&_button]:w-full [&>div]:w-full [&_.inline-block]:!block [&_.inline-block]:w-full"><DatePicker value={f.end_date} onChange={(v) => set("end_date", v)} /></div>
                                 {err("end_date")}
                             </div>
                             <div>

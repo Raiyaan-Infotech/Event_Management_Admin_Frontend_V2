@@ -7,6 +7,7 @@ import {
     Activity, BarChart3, CalendarClock, CalendarDays, CheckCircle2, CircleSlash, Clock, Copy, Eye, FileText, Filter, Info,
     Layers, ListChecks, Loader2, MoreVertical, Pencil, PlusCircle, Save, Scale, Search, Trash2, User,
 } from "lucide-react";
+import { PageLoader } from "@/components/common/page-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -197,6 +198,7 @@ export function OverridesContent() {
 
     return (
         <div className="space-y-4 [&_input]:text-[13px] [&_textarea]:text-[13px] [&_button[role=combobox]]:text-[13px]">
+            <PageLoader open={add.saving || statusMut.isPending || del.isPending || bulk.isPending} text={del.isPending || (bulk.isPending && bulkDelete) ? "Deleting..." : "Saving..."} />
             <ModuleHeader
                 title="Special Limits Override"
                 description="Set custom event booking limits for specific dates (e.g., festivals, high-demand days, or special occasions)."
@@ -417,6 +419,7 @@ function EditSheet({ row, configs, onClose }: { row: AvailabilityOverride | null
     const form = useOverrideForm(initial, row?.id, onClose);
     return (
         <Sheet open={!!row} onOpenChange={(v) => !v && onClose()}>
+            <PageLoader open={form.saving} text="Saving..." />
             <SheetContent className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:w-[500px]">
                 <SheetHeader className="border-b p-4 pr-12">
                     <div className="flex items-start gap-3">

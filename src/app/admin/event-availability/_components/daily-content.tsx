@@ -6,6 +6,7 @@ import {
     CalendarCheck, CalendarClock, CalendarDays, CalendarX2, Eye, ListChecks, Loader2, MoreHorizontal, Pencil,
     PauseCircle, PlayCircle, Plus, PlusCircle, RotateCcw, Search, Settings2, Trash2, XCircle,
 } from "lucide-react";
+import { PageLoader } from "@/components/common/page-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -54,6 +55,7 @@ export function DailyContent() {
 
     return (
         <div className="space-y-4 [&_input]:text-[13px] [&_textarea]:text-[13px] [&_button[role=combobox]]:text-[13px]">
+            <PageLoader open={action.isPending} text={toDelete ? "Deleting..." : "Saving..."} />
             <ModuleHeader
                 title="Daily Event Booking Availability"
                 description="Manage configured daily event booking limits, booked counts and balance status."

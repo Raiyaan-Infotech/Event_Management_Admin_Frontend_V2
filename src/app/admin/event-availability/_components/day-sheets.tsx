@@ -6,6 +6,7 @@ import {
     Loader2, Pencil, PauseCircle, PlusCircle, Scale, Tag, Users, XCircle, Activity,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { PageLoader } from "@/components/common/page-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -64,6 +65,7 @@ export function DaySheet({ row, mode, onClose, onMode }: { row: DayRow | null; m
 
     return (
         <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
+            <PageLoader open={action.isPending} text="Saving..." />
             <SheetContent className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:w-[500px]">
                 <SheetHeader className="border-b p-4 pr-12">
                     <div className="flex items-start gap-3">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CalendarDays, Loader2, Pencil, Plus, Search, Settings2, Trash2 } from "lucide-react";
+import { PageLoader } from "@/components/common/page-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -28,6 +29,7 @@ export function ConfigsContent() {
 
     return (
         <div className="space-y-4 [&_input]:text-[13px] [&_textarea]:text-[13px] [&_button[role=combobox]]:text-[13px]">
+            <PageLoader open={status.isPending || del.isPending} text={del.isPending ? "Deleting..." : "Saving..."} />
             <ModuleHeader
                 title="Availability Configs"
                 description="Each config sets the daily event limit for a category and date range."

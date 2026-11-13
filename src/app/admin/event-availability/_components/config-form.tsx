@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-    CalendarClock, CalendarDays, CalendarRange, ClipboardList, Info, Layers, Loader2, Pencil, Rocket, Save, Settings,
+    CalendarClock, CalendarDays, CalendarRange, ClipboardList, Info, Layers, Pencil, Rocket, Save, Settings,
     SlidersHorizontal, Sparkles, Tag, Users, X,
 } from "lucide-react";
+import { PageLoader } from "@/components/common/page-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -106,14 +107,13 @@ export function ConfigForm({ id }: { id?: number }) {
         else create.mutate(data, { ...done, onSuccess: () => router.push("/admin/event-availability/configs") });
     };
 
-    if (editing && isLoading) {
-        return <div className="flex items-center gap-2 py-24 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />Loading config…</div>;
-    }
+    if (editing && isLoading) return <PageLoader open text="Loading..." />;
 
     const err = (k: string) => errors[k] ? <p className="mt-1 text-xs font-medium text-destructive">{errors[k]}</p> : null;
 
     return (
         <div className="space-y-4 [&_input]:text-[13px] [&_textarea]:text-[13px] [&_button[role=combobox]]:text-[13px]">
+            <PageLoader open={!!saving} text={saving === "published" ? "Publishing..." : "Saving..."} />
             <ModuleHeader
                 title={editing ? "Edit Event Availability Configuration" : "Create Event Availability Configuration"}
                 description="Set daily event booking limits and availability rules for organizer event creation."

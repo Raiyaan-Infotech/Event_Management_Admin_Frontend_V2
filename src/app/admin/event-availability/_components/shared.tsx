@@ -62,6 +62,19 @@ export function ActiveBadge({ active }: { active: boolean | number }) {
 
 /* ------------------------------------------------------------- layout bits -- */
 
+/** The compact page header the other admin pages use (e.g. Subscription Plans). */
+export function ModuleHeader({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
+    return (
+        <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 className="text-xl font-extrabold tracking-tight text-foreground">{title}</h1>
+                {description && <p className="text-xs text-muted-foreground">{description}</p>}
+            </div>
+            {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
+        </div>
+    );
+}
+
 export function StatCard({ icon, label, value, tone = "primary" }: { icon: ReactNode; label: string; value: ReactNode; tone?: "primary" | "green" | "red" | "muted" }) {
     const tones = {
         primary: "bg-primary/10 text-primary",

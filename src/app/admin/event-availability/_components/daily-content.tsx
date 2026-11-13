@@ -6,7 +6,6 @@ import {
     CalendarCheck, CalendarClock, CalendarDays, CalendarX2, Eye, ListChecks, Loader2, MoreHorizontal, Pencil,
     PauseCircle, PlayCircle, Plus, PlusCircle, RotateCcw, Search, Settings2, Trash2, XCircle,
 } from "lucide-react";
-import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -16,7 +15,7 @@ import { DeleteDialog } from "@/components/common/delete-dialog";
 import { useDebounce } from "@/hooks/use-debounce";
 import { DayRow, errorMessage, prettyDate, prettyDateTime, useAvailabilityDaily, useDayAction } from "@/hooks/use-event-availability";
 import { toast } from "sonner";
-import { CategorySelect, DayStatusBadge, SectionCard, StatCard } from "./shared";
+import { CategorySelect, DayStatusBadge, SectionCard, StatCard, ModuleHeader } from "./shared";
 import { DaySheet, SheetMode } from "./day-sheets";
 
 const monthRange = () => {
@@ -55,7 +54,7 @@ export function DailyContent() {
 
     return (
         <div className="space-y-4">
-            <PageHeader
+            <ModuleHeader
                 title="Daily Event Booking Availability"
                 description="Manage configured daily event booking limits, booked counts and balance status."
                 action={

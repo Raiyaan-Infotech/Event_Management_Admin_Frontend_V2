@@ -7,7 +7,6 @@ import {
     Activity, BarChart3, CalendarClock, CalendarDays, CheckCircle2, CircleSlash, Clock, Copy, Eye, FileText, Filter, Info,
     Layers, ListChecks, Loader2, MoreVertical, Pencil, PlusCircle, Save, Scale, Search, Trash2, User,
 } from "lucide-react";
-import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +24,7 @@ import {
     prettyRange, useAvailabilityConfigs, useAvailabilityOverride, useAvailabilityOverrides, useBulkOverrides, useCreateOverride,
     useDeleteOverride, useOverrideStatus, useUpdateOverride,
 } from "@/hooks/use-event-availability";
-import { ActiveBadge, ErrorBox, FieldLabel, InfoRow, OverrideTypeBadge, SectionCard, counter } from "./shared";
+import { ActiveBadge, ErrorBox, FieldLabel, InfoRow, OverrideTypeBadge, SectionCard, counter, ModuleHeader } from "./shared";
 
 const TYPES: { value: OverrideType; label: string }[] = [
     { value: "custom", label: "Set Custom Limit" },
@@ -114,8 +113,8 @@ function FormFields({ form, configs, stacked }: { form: ReturnType<typeof useOve
                 </div>
             </div>
             <div className={f.range ? "grid grid-cols-2 gap-2" : ""}>
-                <DatePicker label={f.range ? "From" : "Date"} required value={f.start_date} onChange={(v) => set("start_date", v)} />
-                {f.range && <DatePicker label="To" required value={f.end_date} onChange={(v) => set("end_date", v)} />}
+                <div><FieldLabel required>{f.range ? "From" : "Date"}</FieldLabel><DatePicker value={f.start_date} onChange={(v) => set("start_date", v)} /></div>
+                {f.range && <div><FieldLabel required>To</FieldLabel><DatePicker value={f.end_date} onChange={(v) => set("end_date", v)} /></div>}
             </div>
             <div>
                 <FieldLabel required>Override Type</FieldLabel>
@@ -198,10 +197,9 @@ export function OverridesContent() {
 
     return (
         <div className="space-y-4">
-            <PageHeader
+            <ModuleHeader
                 title="Special Limits Override"
                 description="Set custom event booking limits for specific dates (e.g., festivals, high-demand days, or special occasions)."
-                icon={<CalendarClock className="h-5 w-5" />}
                 action={<Button variant="outline" asChild><Link href="/admin/event-availability"><CalendarDays />Daily Booking</Link></Button>}
             />
 

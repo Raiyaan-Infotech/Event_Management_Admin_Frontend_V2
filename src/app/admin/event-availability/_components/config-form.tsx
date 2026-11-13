@@ -7,7 +7,6 @@ import {
     CalendarClock, CalendarDays, CalendarRange, ClipboardList, Info, Layers, Loader2, Pencil, Rocket, Save, Settings,
     SlidersHorizontal, Sparkles, Tag, Users, X,
 } from "lucide-react";
-import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,7 +17,7 @@ import {
     AvailabilityConfig, BlockingDate, ConfigPayload, blockingDates, daysInclusive, errorMessage, prettyDate, prettyRange,
     useAvailabilityConfig, useAvailabilityOverrides, useCreateConfig, useUpdateConfig,
 } from "@/hooks/use-event-availability";
-import { ActiveBadge, CategorySelect, ErrorBox, FieldLabel, InfoRow, OverrideTypeBadge, SectionCard, counter } from "./shared";
+import { ActiveBadge, CategorySelect, ErrorBox, FieldLabel, InfoRow, OverrideTypeBadge, SectionCard, counter, ModuleHeader } from "./shared";
 
 const EMPTY: ConfigPayload = {
     name: "", event_category_id: null, start_date: "", end_date: "", daily_max: "",
@@ -115,7 +114,7 @@ export function ConfigForm({ id }: { id?: number }) {
 
     return (
         <div className="space-y-4">
-            <PageHeader
+            <ModuleHeader
                 title={editing ? "Edit Event Availability Configuration" : "Create Event Availability Configuration"}
                 description="Set daily event booking limits and availability rules for organizer event creation."
             />
@@ -151,11 +150,13 @@ export function ConfigForm({ id }: { id?: number }) {
                                 <div className="flex h-9 items-center gap-2 rounded-md border bg-muted/30 px-3 text-sm"><Layers className="h-4 w-4 text-muted-foreground" />Daily Limit</div>
                             </div>
                             <div>
-                                <DatePicker label="Start Date" required value={f.start_date} onChange={(v) => set("start_date", v)} />
+                                <FieldLabel required>Start Date</FieldLabel>
+                                <DatePicker value={f.start_date} onChange={(v) => set("start_date", v)} />
                                 {err("start_date")}
                             </div>
                             <div>
-                                <DatePicker label="End Date" required value={f.end_date} onChange={(v) => set("end_date", v)} />
+                                <FieldLabel required>End Date</FieldLabel>
+                                <DatePicker value={f.end_date} onChange={(v) => set("end_date", v)} />
                                 {err("end_date")}
                             </div>
                             <div>

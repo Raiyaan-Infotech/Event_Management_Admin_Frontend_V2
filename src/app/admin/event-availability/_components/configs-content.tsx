@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CalendarDays, Loader2, Pencil, Plus, Search, Settings2, Trash2 } from "lucide-react";
-import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -13,7 +12,7 @@ import { toast } from "sonner";
 import {
     AvailabilityConfig, errorMessage, prettyRange, useAvailabilityConfigs, useConfigStatus, useDeleteConfig,
 } from "@/hooks/use-event-availability";
-import { SectionCard } from "./shared";
+import { SectionCard, ModuleHeader } from "./shared";
 
 /** All availability configs (not in the designs — needed to edit or switch one off). */
 export function ConfigsContent() {
@@ -29,7 +28,7 @@ export function ConfigsContent() {
 
     return (
         <div className="space-y-4">
-            <PageHeader
+            <ModuleHeader
                 title="Availability Configs"
                 description="Each config sets the daily event limit for a category and date range."
                 action={

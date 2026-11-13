@@ -65,12 +65,12 @@ export function ActiveBadge({ active }: { active: boolean | number }) {
 /** The compact page header the other admin pages use (e.g. Subscription Plans). */
 export function ModuleHeader({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
     return (
-        <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
+        <div className="flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
                 <h1 className="text-xl font-extrabold tracking-tight text-foreground">{title}</h1>
                 {description && <p className="text-xs text-muted-foreground">{description}</p>}
             </div>
-            {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
+            {action && <div className="flex shrink-0 flex-wrap items-center gap-2 [&_a]:h-8 [&_a]:text-[13px] [&_button]:h-8 [&_button]:text-[13px]">{action}</div>}
         </div>
     );
 }

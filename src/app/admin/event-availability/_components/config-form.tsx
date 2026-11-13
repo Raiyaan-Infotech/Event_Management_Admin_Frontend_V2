@@ -49,10 +49,10 @@ const openDays = (f: ConfigPayload) => {
 
 function ToggleRow({ label, checked, onChange, hint }: { label: string; checked: boolean; onChange: (v: boolean) => void; hint: string }) {
     return (
-        <label className="flex items-center gap-3" title={hint}>
+        <label className="flex items-center gap-2.5" title={hint}>
             <Switch checked={checked} onCheckedChange={onChange} onText="ON" offText="OFF" />
-            <span className="text-sm font-medium">{label}</span>
-            <Info className="h-4 w-4 text-muted-foreground" aria-label={hint} />
+            <span className="text-[13px] font-medium">{label}</span>
+            <Info className="h-3.5 w-3.5 text-muted-foreground" aria-label={hint} />
         </label>
     );
 }
@@ -113,16 +113,16 @@ export function ConfigForm({ id }: { id?: number }) {
     const err = (k: string) => errors[k] ? <p className="mt-1 text-xs font-medium text-destructive">{errors[k]}</p> : null;
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 [&_input]:text-[13px] [&_textarea]:text-[13px] [&_button[role=combobox]]:text-[13px]">
             <ModuleHeader
                 title={editing ? "Edit Event Availability Configuration" : "Create Event Availability Configuration"}
                 description="Set daily event booking limits and availability rules for organizer event creation."
             />
 
-            <div className="grid gap-4 xl:grid-cols-[1fr_340px] xl:items-start">
+            <div className="grid gap-4 xl:grid-cols-[1fr_300px] xl:items-start">
                 <div className="space-y-4">
                     <SectionCard icon={<Settings />} title="1. Basic Configuration">
-                        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr_auto]">
+                        <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-[1.4fr_1fr_1fr_auto]">
                             <div>
                                 <FieldLabel required>Config Name</FieldLabel>
                                 <Input maxLength={120} value={f.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. November Wedding Availability" />
@@ -134,7 +134,7 @@ export function ConfigForm({ id }: { id?: number }) {
                             </div>
                             <div>
                                 <FieldLabel required>Applies To</FieldLabel>
-                                <div className="flex h-9 items-center gap-2 rounded-md border bg-muted/30 px-3 text-sm"><Users className="h-4 w-4 text-muted-foreground" />All Organizers</div>
+                                <div className="flex h-9 items-center gap-2 whitespace-nowrap rounded-md border bg-muted/30 px-3 text-[13px]"><Users className="h-4 w-4 shrink-0 text-muted-foreground" />All Organizers</div>
                             </div>
                             <div>
                                 <FieldLabel>Status</FieldLabel>
@@ -144,10 +144,10 @@ export function ConfigForm({ id }: { id?: number }) {
                     </SectionCard>
 
                     <SectionCard icon={<CalendarDays />} title="2. Availability Rules">
-                        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                        <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4">
                             <div>
                                 <FieldLabel required>Configuration Type</FieldLabel>
-                                <div className="flex h-9 items-center gap-2 rounded-md border bg-muted/30 px-3 text-sm"><Layers className="h-4 w-4 text-muted-foreground" />Daily Limit</div>
+                                <div className="flex h-9 items-center gap-2 whitespace-nowrap rounded-md border bg-muted/30 px-3 text-[13px]"><Layers className="h-4 w-4 shrink-0 text-muted-foreground" />Daily Limit</div>
                             </div>
                             <div>
                                 <FieldLabel required>Start Date</FieldLabel>

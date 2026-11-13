@@ -196,7 +196,7 @@ export function OverridesContent() {
     const setActive = (o: AvailabilityOverride, v: boolean) => statusMut.mutate({ id: o.id, is_active: v }, { onError: (e) => toast.error(errorMessage(e)) });
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 [&_input]:text-[13px] [&_textarea]:text-[13px] [&_button[role=combobox]]:text-[13px]">
             <ModuleHeader
                 title="Special Limits Override"
                 description="Set custom event booking limits for specific dates (e.g., festivals, high-demand days, or special occasions)."

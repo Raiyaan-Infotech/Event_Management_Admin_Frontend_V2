@@ -27,7 +27,7 @@ export function ConfigsContent() {
     const rows = data?.data ?? [];
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 [&_input]:text-[13px] [&_textarea]:text-[13px] [&_button[role=combobox]]:text-[13px]">
             <ModuleHeader
                 title="Availability Configs"
                 description="Each config sets the daily event limit for a category and date range."

@@ -53,12 +53,12 @@ export function DailyContent() {
         action.mutate({ configId: row.config_id, date: row.date, body }, { onError: (e) => toast.error(errorMessage(e)) });
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 [&_input]:text-[13px] [&_textarea]:text-[13px] [&_button[role=combobox]]:text-[13px]">
             <ModuleHeader
                 title="Daily Event Booking Availability"
                 description="Manage configured daily event booking limits, booked counts and balance status."
                 action={
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-nowrap gap-2">
                         <Button variant="outline" asChild><Link href="/admin/event-availability/overrides"><CalendarClock />Special Limits Override</Link></Button>
                         <Button variant="outline" asChild><Link href="/admin/event-availability/configs"><Settings2 />Configs</Link></Button>
                         <Button asChild><Link href="/admin/event-availability/create"><Plus />Create Config</Link></Button>
@@ -98,7 +98,7 @@ export function DailyContent() {
                     </div>
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input className="h-9 pl-9" placeholder="Search by date, category..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+                        <Input className="h-9 pl-9" placeholder="Search..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
                     </div>
                     <Button variant="outline" className="h-9" onClick={reset}><RotateCcw />Reset</Button>
                 </div>

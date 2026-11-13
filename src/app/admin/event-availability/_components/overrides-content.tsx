@@ -49,7 +49,19 @@ const fromOverride = (o: AvailabilityOverride): FormState => ({
 
 /* --------------------------------------------------------------- the form -- */
 
-function useOverrideForm(initial: FormState, editId?: number, onSaved?: () => void) {
+/**
+ * Increase / Reduce ADD TO or TAKE FROM the config's default limit (Jamal 2026-11-13: "this is add on,
+ * not update"): default 3, Increase By 2 → limit 5. Set Custom Limit is the exact number.
+ */
+const resultLimit = (type: OverrideType, value: string, base: number | undefined) => {
+    const n = Number(value);
+    if (value === "" || !Number.isInteger(n)) return null;
+    if (type === "increase") return base === undefined ? null : base + n;
+    if (type === "reduce") return base === undefined ? null : base - n;
+    return n;
+};
+
+function useOverrideForm(initial: FormState, editId?: number, onSaved?: () => void, baseFor: (configId: string) => number | undefined = () => undefined) {
     const [f, setF] = useState<FormState>(initial);
     const [error, setError] = useState("");
     const [blocked, setBlocked] = useState<BlockingDate[]>([]);
@@ -66,13 +78,21 @@ function useOverrideForm(initial: FormState, editId?: number, onSaved?: () => vo
         if (!f.start_date) return setError("Please choose the date.");
         if (f.range && !f.end_date) return setError("Please choose the end date.");
         if (f.range && f.end_date < f.start_date) return setError("The end date cannot be before the start date.");
-        if (needsLimit(f.override_type) && (f.daily_limit === "" || !Number.isInteger(Number(f.daily_limit)) || Number(f.daily_limit) < 0)) {
+        const base = baseFor(f.config_id);
+        const n = Number(f.daily_limit);
+        if (f.override_type === "custom" && (f.daily_limit === "" || !Number.isInteger(n) || n < 0)) {
             return setError("Please enter the daily event limit.");
+        }
+        if ((f.override_type === "increase" || f.override_type === "reduce") && (f.daily_limit === "" || !Number.isInteger(n) || n < 1)) {
+            return setError(`Please enter how many events to ${f.override_type === "increase" ? "add" : "take away"} (1 or more).`);
+        }
+        if (f.override_type === "reduce" && base !== undefined && n > base) {
+            return setError(`You can reduce by at most ${base} (the default limit is ${base}).`);
         }
         if (f.override_type === "disabled" && !f.reason.trim()) return setError("Please enter the reason for disabling these dates.");
         const data: OverridePayload = {
             config_id: Number(f.config_id), start_date: f.start_date, end_date: f.range ? f.end_date : f.start_date,
-            override_type: f.override_type, daily_limit: needsLimit(f.override_type) ? Number(f.daily_limit) : null,
+            override_type: f.override_type, daily_limit: needsLimit(f.override_type) ? resultLimit(f.override_type, f.daily_limit, base) : null,
             reason: f.reason.trim(), is_active: f.is_active,
         };
         const opts = {
@@ -126,9 +146,21 @@ function FormFields({ form, configs, stacked }: { form: ReturnType<typeof useOve
             </div>
             <div className="grid grid-cols-[1fr_auto] items-end gap-4">
                 <div>
-                    <FieldLabel required={needsLimit(f.override_type)}>Daily Event Limit</FieldLabel>
-                    <Input type="number" min={0} disabled={!needsLimit(f.override_type)} value={needsLimit(f.override_type) ? f.daily_limit : (f.override_type === "block" ? "0" : "")}
-                        onChange={(e) => set("daily_limit", e.target.value)} placeholder={needsLimit(f.override_type) ? "e.g. 20" : "—"} />
+                    <FieldLabel required={needsLimit(f.override_type)}>
+                        {f.override_type === "increase" ? "Increase By" : f.override_type === "reduce" ? "Reduce By" : "Daily Event Limit"}
+                    </FieldLabel>
+                    <Input type="number" min={f.override_type === "custom" ? 0 : 1} disabled={!needsLimit(f.override_type)} value={needsLimit(f.override_type) ? f.daily_limit : (f.override_type === "block" ? "0" : "")}
+                        onChange={(e) => set("daily_limit", e.target.value)}
+                        placeholder={f.override_type === "custom" ? "e.g. 20" : needsLimit(f.override_type) ? "e.g. 2" : "—"} />
+                    {(f.override_type === "increase" || f.override_type === "reduce") && cfg && (() => {
+                        const r = resultLimit(f.override_type, f.daily_limit, cfg.daily_max);
+                        return (
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                New limit: <b className={r !== null && r < 0 ? "text-destructive" : "text-foreground"}>{r ?? "—"}</b>
+                                {r !== null && <> ({cfg.daily_max} {f.override_type === "increase" ? "+" : "−"} {f.daily_limit})</>}
+                            </p>
+                        );
+                    })()}
                 </div>
                 <div>
                     <FieldLabel>Status</FieldLabel>
@@ -156,7 +188,8 @@ export function OverridesContent() {
     const configs = cfgData?.data ?? [];
 
     const [addInitial, setAddInitial] = useState<FormState>(() => emptyForm(presetConfig));
-    const add = useOverrideForm(addInitial, undefined, () => setAddInitial(emptyForm(presetConfig)));
+    const baseFor = (id: string) => configs.find((c) => String(c.id) === id)?.daily_max;
+    const add = useOverrideForm(addInitial, undefined, () => setAddInitial(emptyForm(presetConfig)), baseFor);
 
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("all");
@@ -416,7 +449,7 @@ function DetailsSheet({ id, onClose, onEdit }: { id?: number; onClose: () => voi
 function EditSheet({ row, configs, onClose }: { row: AvailabilityOverride | null; configs: Parameters<typeof FormFields>[0]["configs"]; onClose: () => void }) {
     const [initial, setInitial] = useState<FormState>(emptyForm());
     useEffect(() => { if (row) setInitial(fromOverride(row)); }, [row]);
-    const form = useOverrideForm(initial, row?.id, onClose);
+    const form = useOverrideForm(initial, row?.id, onClose, (id) => configs.find((c) => String(c.id) === id)?.daily_max);
     return (
         <Sheet open={!!row} onOpenChange={(v) => !v && onClose()}>
             <PageLoader open={form.saving} text="Saving..." />

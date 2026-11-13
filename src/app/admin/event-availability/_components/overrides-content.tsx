@@ -268,14 +268,14 @@ export function OverridesContent() {
             </div>
 
             <SectionCard icon={<ListChecks />} title="Special Limits Override List" action={
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-nowrap items-center gap-2">
                     {isFetching && !isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                    <div className="relative w-72">
+                    <div className="relative w-56">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input className="h-9 pl-9" placeholder="Search by date, reason, or status..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+                        <Input className="h-9 pl-9" placeholder="Search date, reason, status..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
                     </div>
                     <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-                        <SelectTrigger className="h-9 w-44"><Filter className="mr-2 h-4 w-4" /><SelectValue>{{ all: "All Statuses", active: "Active", inactive: "Inactive" }[status]}</SelectValue></SelectTrigger>
+                        <SelectTrigger className="h-9 w-36"><Filter className="mr-1.5 h-4 w-4" /><SelectValue>{{ all: "All Statuses", active: "Active", inactive: "Inactive" }[status]}</SelectValue></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Statuses</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
@@ -290,38 +290,39 @@ export function OverridesContent() {
                     </p>
                 )}
                 <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full text-[13px]">
+                    <table className="w-full whitespace-nowrap text-[13px]">
                         <thead className="bg-muted/40 text-left text-xs font-semibold text-muted-foreground">
                             <tr>
-                                <th className="w-10 px-3 py-2.5"><Checkbox checked={allOnPage} onCheckedChange={toggleAll} aria-label="Select all" /></th>
-                                {["#", "Date / Date Range", "Type", "Default Limit", "Override Limit", "Booked", "Balance", "Status", "Reason / Notes", "Actions"].map((h) => (
-                                    <th key={h} className="whitespace-nowrap px-3 py-2.5">{h}</th>
+                                <th className="w-9 px-2.5 py-2.5"><Checkbox checked={allOnPage} onCheckedChange={toggleAll} aria-label="Select all" /></th>
+                                {["#", "Date / Date Range", "Type", "Limit", "Booked", "Balance", "Status", "Reason / Notes", "Actions"].map((h) => (
+                                    <th key={h} className={`px-2.5 py-2.5 ${["Limit", "Booked", "Balance"].includes(h) ? "text-center" : ""}`}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
                             {isLoading ? (
-                                <tr><td colSpan={11} className="py-16 text-center text-muted-foreground"><Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />Loading overrides…</td></tr>
+                                <tr><td colSpan={10} className="py-16 text-center text-muted-foreground"><Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />Loading overrides…</td></tr>
                             ) : !rows.length ? (
-                                <tr><td colSpan={11} className="py-16 text-center text-muted-foreground">No overrides yet.</td></tr>
+                                <tr><td colSpan={10} className="py-16 text-center text-muted-foreground">No overrides yet.</td></tr>
                             ) : rows.map((o, i) => (
                                 <tr key={o.id} className="border-t hover:bg-muted/20">
-                                    <td className="px-3 py-2"><Checkbox checked={selected.includes(o.id)} onCheckedChange={(v) => setSelected(v ? [...selected, o.id] : selected.filter((x) => x !== o.id))} aria-label={`Select ${o.code}`} /></td>
-                                    <td className="px-3 py-2">{(page - 1) * 10 + i + 1}</td>
-                                    <td className="whitespace-nowrap px-3 py-2 font-medium">{prettyRange(o.start_date, o.end_date)}<p className="text-xs font-normal text-muted-foreground">{o.category_name}</p></td>
-                                    <td className="px-3 py-2"><OverrideTypeBadge type={o.type} /></td>
-                                    <td className="px-3 py-2 text-center">{o.default_limit}</td>
-                                    <td className="px-3 py-2 text-center font-bold">{o.override_limit ?? "—"}</td>
-                                    <td className="px-3 py-2 text-center">{o.booked}</td>
-                                    <td className="px-3 py-2 text-center">{o.balance}</td>
-                                    <td className="px-3 py-2"><ActiveBadge active={o.is_active} /></td>
-                                    <td className="max-w-[220px] px-3 py-2 text-xs">{o.reason || "—"}</td>
-                                    <td className="px-3 py-2">
+                                    <td className="px-2.5 py-2"><Checkbox checked={selected.includes(o.id)} onCheckedChange={(v) => setSelected(v ? [...selected, o.id] : selected.filter((x) => x !== o.id))} aria-label={`Select ${o.code}`} /></td>
+                                    <td className="px-2.5 py-2">{(page - 1) * 10 + i + 1}</td>
+                                    <td className="px-2.5 py-2 font-medium">{prettyRange(o.start_date, o.end_date)}<p className="text-xs font-normal text-muted-foreground">{o.category_name}</p></td>
+                                    <td className="px-2.5 py-2"><OverrideTypeBadge type={o.type} /></td>
+                                    <td className="px-2.5 py-2 text-center" title={`Default ${o.default_limit} → override ${o.override_limit ?? "—"}`}>
+                                        <span className="text-muted-foreground">{o.default_limit}</span> → <b>{o.override_limit ?? "—"}</b>
+                                    </td>
+                                    <td className="px-2.5 py-2 text-center">{o.booked}</td>
+                                    <td className="px-2.5 py-2 text-center">{o.balance}</td>
+                                    <td className="px-2.5 py-2"><ActiveBadge active={o.is_active} /></td>
+                                    <td className="px-2.5 py-2 text-xs"><span className="block max-w-[150px] truncate" title={o.reason || ""}>{o.reason || "—"}</span></td>
+                                    <td className="px-2.5 py-2">
                                         <div className="flex items-center gap-1">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="View details" onClick={() => setViewId(o.id)}><Eye /></Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Edit override" onClick={() => setEditRow(o)}><Pencil /></Button>
+                                            <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="View details" onClick={() => setViewId(o.id)}><Eye /></Button>
+                                            <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Edit override" onClick={() => setEditRow(o)}><Pencil /></Button>
                                             <DropdownMenu>
-                                                <DropdownMenuTrigger asChild><Button variant="outline" size="icon" className="h-8 w-8" aria-label="More actions"><MoreVertical /></Button></DropdownMenuTrigger>
+                                                <DropdownMenuTrigger asChild><Button variant="outline" size="icon" className="h-7 w-7" aria-label="More actions"><MoreVertical /></Button></DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-48">
                                                     <DropdownMenuItem onClick={() => setViewId(o.id)}><Eye className="mr-2 h-4 w-4" />View Details</DropdownMenuItem>
                                                     <DropdownMenuItem onClick={() => setEditRow(o)}><Pencil className="mr-2 h-4 w-4" />Edit Override</DropdownMenuItem>

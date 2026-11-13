@@ -65,21 +65,21 @@ export function DaySheet({ row, mode, onClose, onMode }: { row: DayRow | null; m
     return (
         <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
             <SheetContent className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:w-[500px]">
-                <SheetHeader className="border-b p-5 pr-12">
+                <SheetHeader className="border-b p-4 pr-12">
                     <div className="flex items-start gap-3">
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><head.Icon className="h-5 w-5" /></span>
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><head.Icon className="h-5 w-5" /></span>
                         <div>
-                            <SheetTitle className="text-xl">{mode === "events" ? `Booked Events on ${prettyDate(row.date)}` : head.title}</SheetTitle>
+                            <SheetTitle className="text-base">{mode === "events" ? `Booked Events on ${prettyDate(row.date)}` : head.title}</SheetTitle>
                             <SheetDescription>{mode === "events" ? `${booked} of ${current.daily_max} slots used.` : head.sub}</SheetDescription>
                         </div>
                     </div>
                 </SheetHeader>
 
-                <div className="flex-1 space-y-5 p-5">
+                <div className="flex-1 space-y-4 p-4">
                     {/* date banner */}
-                    <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                    <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
                         <div>
-                            <p className="text-2xl font-bold text-foreground">{prettyDate(row.date)}</p>
+                            <p className="text-lg font-bold text-foreground">{prettyDate(row.date)}</p>
                             <p className="flex items-center gap-1.5 text-sm text-muted-foreground"><Calendar className="h-4 w-4" />{row.day} · {row.category_name}</p>
                         </div>
                         <div className="text-right">
@@ -92,7 +92,7 @@ export function DaySheet({ row, mode, onClose, onMode }: { row: DayRow | null; m
 
                     {mode === "view" && day && (
                         <>
-                            <div className="rounded-xl border p-4">
+                            <div className="rounded-lg border p-3">
                                 <p className="mb-2 font-semibold">Configuration Details</p>
                                 <InfoRow icon={<FileText />} label="Config" value={day.config_name} />
                                 <InfoRow icon={<Tag />} label="Category" value={day.category_name} />
@@ -128,7 +128,7 @@ export function DaySheet({ row, mode, onClose, onMode }: { row: DayRow | null; m
                                 <div><FieldLabel hint="(Already Booked)">Created Events</FieldLabel><Input value={booked} disabled /></div>
                                 <div>
                                     <FieldLabel>Balance Preview</FieldLabel>
-                                    <div className={`flex h-10 items-center gap-2 rounded-md border px-3 text-sm font-semibold ${newLimitNum - booked < 0 ? "border-red-200 bg-red-50 text-red-600" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
+                                    <div className={`flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-semibold ${newLimitNum - booked < 0 ? "border-red-200 bg-red-50 text-red-600" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
                                         <Scale className="h-4 w-4" />{limit === "" ? "—" : `${Math.max(0, newLimitNum - booked)} slots (${newLimitNum} – ${booked})`}
                                     </div>
                                 </div>
@@ -143,7 +143,7 @@ export function DaySheet({ row, mode, onClose, onMode }: { row: DayRow | null; m
 
                     {mode === "increase" && (
                         <div className="space-y-3">
-                            <div className="rounded-xl border p-4">
+                            <div className="rounded-lg border p-3">
                                 <InfoRow icon={<Layers />} label="Current Limit" value={current.daily_max} />
                                 <div className="flex items-center justify-between gap-4 border-b border-border/50 py-2.5">
                                     <span className="flex items-center gap-2 text-sm text-muted-foreground"><PlusCircle className="h-4 w-4" />Increase By <span className="text-destructive">*</span></span>
@@ -163,7 +163,7 @@ export function DaySheet({ row, mode, onClose, onMode }: { row: DayRow | null; m
 
                     {mode === "full" && (
                         <div className="space-y-4">
-                            <div className="flex gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
+                            <div className="flex gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
                                 <Info className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                                 <p><b>The selected date will stop accepting new event bookings</b> and its balance will become 0. Existing booked events will remain unchanged.</p>
                             </div>
@@ -186,11 +186,11 @@ export function DaySheet({ row, mode, onClose, onMode }: { row: DayRow | null; m
 
                     {mode === "disable" && (
                         <div className="space-y-4">
-                            <div className="flex gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
+                            <div className="flex gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
                                 <Info className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                                 <p><b>Organizers will no longer be able to book events on this date while it is disabled.</b> Existing booked events stay. Enable it again any time.</p>
                             </div>
-                            <div className="rounded-xl border p-4">
+                            <div className="rounded-lg border p-3">
                                 <InfoRow label="Current Daily Max Events" value={current.daily_max} />
                                 <InfoRow label="Created Events" value={booked} />
                                 <InfoRow label="Current Status" value={<DayStatusBadge status={current.status} />} />
@@ -240,7 +240,7 @@ export function DaySheet({ row, mode, onClose, onMode }: { row: DayRow | null; m
 
 function EventsList({ events, big }: { events: { id: number; name: string; client_name: string | null; start_time: string | null; venue_name: string | null; status: string }[]; big?: boolean }) {
     return (
-        <div className="rounded-xl border p-4">
+        <div className="rounded-lg border p-3">
             <div className="mb-2 flex items-center justify-between">
                 <p className="font-semibold">Booked Events</p>
                 <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{events.length} Event{events.length === 1 ? "" : "s"}</span>

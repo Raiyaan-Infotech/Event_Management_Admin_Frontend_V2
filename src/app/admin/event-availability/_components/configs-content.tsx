@@ -28,7 +28,7 @@ export function ConfigsContent() {
     const rows = data?.data ?? [];
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <PageHeader
                 title="Availability Configs"
                 description="Each config sets the daily event limit for a category and date range."
@@ -42,13 +42,13 @@ export function ConfigsContent() {
             <SectionCard icon={<Settings2 />} title="Config List" action={
                 <div className="relative w-72">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input className="h-10 pl-9" placeholder="Search by name..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+                    <Input className="h-9 pl-9" placeholder="Search by name..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
                 </div>
             }>
                 <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-[13px]">
                         <thead className="bg-muted/40 text-left text-xs font-semibold text-muted-foreground">
-                            <tr>{["Config Name", "Category", "Active Period", "Days", "Daily Max", "Publish", "Status", ""].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3">{h}</th>)}</tr>
+                            <tr>{["Config Name", "Category", "Active Period", "Days", "Daily Max", "Publish", "Status", ""].map((h) => <th key={h} className="whitespace-nowrap px-3 py-2.5">{h}</th>)}</tr>
                         </thead>
                         <tbody>
                             {isLoading ? (
@@ -57,17 +57,17 @@ export function ConfigsContent() {
                                 <tr><td colSpan={8} className="py-16 text-center text-muted-foreground">No configs yet. <Link href="/admin/event-availability/create" className="font-medium text-primary hover:underline">Create the first one</Link>.</td></tr>
                             ) : rows.map((c) => (
                                 <tr key={c.id} className="border-t hover:bg-muted/20">
-                                    <td className="px-4 py-3 font-medium">{c.name}</td>
-                                    <td className="px-4 py-3">{c.category_name}</td>
-                                    <td className="whitespace-nowrap px-4 py-3">{prettyRange(c.start_date, c.end_date)}</td>
-                                    <td className="px-4 py-3">{c.total_days}</td>
-                                    <td className="px-4 py-3">{c.daily_max}</td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-3 py-2 font-medium">{c.name}</td>
+                                    <td className="px-3 py-2">{c.category_name}</td>
+                                    <td className="whitespace-nowrap px-3 py-2">{prettyRange(c.start_date, c.end_date)}</td>
+                                    <td className="px-3 py-2">{c.total_days}</td>
+                                    <td className="px-3 py-2">{c.daily_max}</td>
+                                    <td className="px-3 py-2">
                                         <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${c.publish_status === "published" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>
                                             {c.publish_status === "published" ? "Published" : "Draft"}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-3 py-2">
                                         <Switch
                                             checked={!!c.is_active}
                                             pending={busyId === c.id}
@@ -81,7 +81,7 @@ export function ConfigsContent() {
                                             }}
                                         />
                                     </td>
-                                    <td className="px-4 py-3 text-right">
+                                    <td className="px-3 py-2 text-right">
                                         <div className="flex justify-end gap-1">
                                             <Button variant="ghost" size="icon" className="h-8 w-8" asChild aria-label="Edit"><Link href={`/admin/event-availability/configs/${c.id}`}><Pencil /></Link></Button>
                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" aria-label="Delete" onClick={() => setToDelete(c)}><Trash2 /></Button>

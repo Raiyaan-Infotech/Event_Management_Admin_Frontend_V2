@@ -24,8 +24,8 @@ const DAY_STATUS: Record<DayStatus, { label: string; cls: string; Icon: typeof C
 export function DayStatusBadge({ status, className }: { status: DayStatus; className?: string }) {
     const s = DAY_STATUS[status] ?? DAY_STATUS.available;
     return (
-        <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap", s.cls, className)}>
-            <s.Icon className="h-3.5 w-3.5" /> {s.label}
+        <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap", s.cls, className)}>
+            <s.Icon className="h-3 w-3" /> {s.label}
         </span>
     );
 }
@@ -70,11 +70,11 @@ export function StatCard({ icon, label, value, tone = "primary" }: { icon: React
         muted: "bg-muted text-muted-foreground",
     };
     return (
-        <div className="flex items-center gap-4 rounded-xl border bg-card p-5 shadow-sm">
-            <div className={cn("flex h-14 w-14 shrink-0 items-center justify-center rounded-xl [&_svg]:h-7 [&_svg]:w-7", tones[tone])}>{icon}</div>
+        <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-sm">
+            <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg [&_svg]:h-5 [&_svg]:w-5", tones[tone])}>{icon}</div>
             <div>
-                <p className="text-sm text-muted-foreground">{label}</p>
-                <p className="text-3xl font-bold leading-tight text-foreground">{value}</p>
+                <p className="text-xs text-muted-foreground">{label}</p>
+                <p className="text-xl font-bold leading-tight text-foreground">{value}</p>
             </div>
         </div>
     );
@@ -82,11 +82,11 @@ export function StatCard({ icon, label, value, tone = "primary" }: { icon: React
 
 export function SectionCard({ icon, title, action, children, className }: { icon: ReactNode; title: string; action?: ReactNode; children: ReactNode; className?: string }) {
     return (
-        <section className={cn("rounded-xl border bg-card p-5 shadow-sm", className)}>
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <section className={cn("rounded-lg border bg-card p-4 shadow-sm", className)}>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary [&_svg]:h-5 [&_svg]:w-5">{icon}</span>
-                    <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary [&_svg]:h-4 [&_svg]:w-4">{icon}</span>
+                    <h2 className="text-[15px] font-semibold text-foreground">{title}</h2>
                 </div>
                 {action}
             </div>
@@ -97,7 +97,7 @@ export function SectionCard({ icon, title, action, children, className }: { icon
 
 export function FieldLabel({ children, required, hint }: { children: ReactNode; required?: boolean; hint?: string }) {
     return (
-        <Label className="mb-1.5 block text-sm font-medium">
+        <Label className="mb-1 block text-[13px] font-medium">
             {children}
             {required && <span className="text-destructive"> *</span>}
             {hint && <span className="font-normal text-muted-foreground"> {hint}</span>}
@@ -108,9 +108,9 @@ export function FieldLabel({ children, required, hint }: { children: ReactNode; 
 /** Key/value row used in the side panels. */
 export function InfoRow({ icon, label, value }: { icon?: ReactNode; label: string; value: ReactNode }) {
     return (
-        <div className="flex items-start justify-between gap-4 border-b border-border/50 py-2.5 last:border-0">
-            <span className="flex items-center gap-2 text-sm text-muted-foreground [&_svg]:h-4 [&_svg]:w-4">{icon}{label}</span>
-            <span className="text-right text-sm font-medium text-foreground">{value}</span>
+        <div className="flex items-start justify-between gap-4 border-b border-border/50 py-2 last:border-0">
+            <span className="flex items-center gap-2 text-[13px] text-muted-foreground [&_svg]:h-3.5 [&_svg]:w-3.5">{icon}{label}</span>
+            <span className="text-right text-[13px] font-medium text-foreground">{value}</span>
         </div>
     );
 }
@@ -160,7 +160,7 @@ export function CategorySelect({ value, onChange, allowAll = true, allLabel = "A
     const cats = (data?.data ?? []) as { id: number; name: string; is_active?: boolean | number }[];
     return (
         <Select value={value} onValueChange={onChange}>
-            <SelectTrigger className={cn("h-10", className)}>
+            <SelectTrigger className={cn("h-9", className)}>
                 <SelectValue placeholder="Choose category">
                     {value === "all" ? allLabel : (cats.find((c) => String(c.id) === value)?.name ?? "Choose category")}
                 </SelectValue>

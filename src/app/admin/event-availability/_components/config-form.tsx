@@ -114,14 +114,14 @@ export function ConfigForm({ id }: { id?: number }) {
     const err = (k: string) => errors[k] ? <p className="mt-1 text-xs font-medium text-destructive">{errors[k]}</p> : null;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <PageHeader
                 title={editing ? "Edit Event Availability Configuration" : "Create Event Availability Configuration"}
                 description="Set daily event booking limits and availability rules for organizer event creation."
             />
 
-            <div className="grid gap-6 xl:grid-cols-[1fr_380px] xl:items-start">
-                <div className="space-y-5">
+            <div className="grid gap-4 xl:grid-cols-[1fr_340px] xl:items-start">
+                <div className="space-y-4">
                     <SectionCard icon={<Settings />} title="1. Basic Configuration">
                         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr_auto]">
                             <div>
@@ -135,11 +135,11 @@ export function ConfigForm({ id }: { id?: number }) {
                             </div>
                             <div>
                                 <FieldLabel required>Applies To</FieldLabel>
-                                <div className="flex h-10 items-center gap-2 rounded-md border bg-muted/30 px-3 text-sm"><Users className="h-4 w-4 text-muted-foreground" />All Organizers</div>
+                                <div className="flex h-9 items-center gap-2 rounded-md border bg-muted/30 px-3 text-sm"><Users className="h-4 w-4 text-muted-foreground" />All Organizers</div>
                             </div>
                             <div>
                                 <FieldLabel>Status</FieldLabel>
-                                <div className="flex h-10 items-center"><Switch checked={f.is_active} onCheckedChange={(v) => set("is_active", v)} onText="Active" offText="Off" /></div>
+                                <div className="flex h-9 items-center"><Switch checked={f.is_active} onCheckedChange={(v) => set("is_active", v)} onText="Active" offText="Off" /></div>
                             </div>
                         </div>
                     </SectionCard>
@@ -148,7 +148,7 @@ export function ConfigForm({ id }: { id?: number }) {
                         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                             <div>
                                 <FieldLabel required>Configuration Type</FieldLabel>
-                                <div className="flex h-10 items-center gap-2 rounded-md border bg-muted/30 px-3 text-sm"><Layers className="h-4 w-4 text-muted-foreground" />Daily Limit</div>
+                                <div className="flex h-9 items-center gap-2 rounded-md border bg-muted/30 px-3 text-sm"><Layers className="h-4 w-4 text-muted-foreground" />Daily Limit</div>
                             </div>
                             <div>
                                 <DatePicker label="Start Date" required value={f.start_date} onChange={(v) => set("start_date", v)} />
@@ -164,7 +164,7 @@ export function ConfigForm({ id }: { id?: number }) {
                                 {err("daily_max")}
                             </div>
                         </div>
-                        <div className="mt-5 flex flex-wrap gap-x-8 gap-y-3">
+                        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
                             <ToggleRow label="Allow Single Date Booking" checked={f.allow_single_date} onChange={(v) => set("allow_single_date", v)} hint="Organizers may create a one-day event." />
                             <ToggleRow label="Allow Multiple Date Booking" checked={f.allow_multi_date} onChange={(v) => set("allow_multi_date", v)} hint="Organizers may create an event over several days. It takes one slot on every day." />
                             <ToggleRow label="Auto Mark Fully Booked when balance reaches 0" checked={f.auto_full} onChange={(v) => set("auto_full", v)} hint="The date shows Fully Booked when no slots are left." />
@@ -227,20 +227,20 @@ export function ConfigForm({ id }: { id?: number }) {
                             <p className="py-6 text-center text-sm text-muted-foreground">No special dates yet. Use <b>Special Limit Override</b> to raise, lower or block a date.</p>
                         ) : (
                             <div className="overflow-x-auto rounded-lg border">
-                                <table className="w-full text-sm">
+                                <table className="w-full text-[13px]">
                                     <thead className="bg-muted/40 text-left text-xs font-semibold text-muted-foreground">
-                                        <tr>{["Date", "Type", "Max Events", "Booked", "Balance", "Status", ""].map((h) => <th key={h} className="px-4 py-2.5">{h}</th>)}</tr>
+                                        <tr>{["Date", "Type", "Max Events", "Booked", "Balance", "Status", ""].map((h) => <th key={h} className="px-3 py-2">{h}</th>)}</tr>
                                     </thead>
                                     <tbody>
                                         {configOverrides.map((o) => (
                                             <tr key={o.id} className="border-t">
-                                                <td className="whitespace-nowrap px-4 py-2.5 font-medium">{prettyRange(o.start_date, o.end_date)}</td>
-                                                <td className="px-4 py-2.5"><OverrideTypeBadge type={o.type} /></td>
-                                                <td className="px-4 py-2.5">{o.override_limit ?? "—"}</td>
-                                                <td className="px-4 py-2.5">{o.booked}</td>
-                                                <td className="px-4 py-2.5">{o.balance}</td>
-                                                <td className="px-4 py-2.5"><ActiveBadge active={o.is_active} /></td>
-                                                <td className="px-4 py-2.5 text-right">
+                                                <td className="whitespace-nowrap px-3 py-2 font-medium">{prettyRange(o.start_date, o.end_date)}</td>
+                                                <td className="px-3 py-2"><OverrideTypeBadge type={o.type} /></td>
+                                                <td className="px-3 py-2">{o.override_limit ?? "—"}</td>
+                                                <td className="px-3 py-2">{o.booked}</td>
+                                                <td className="px-3 py-2">{o.balance}</td>
+                                                <td className="px-3 py-2"><ActiveBadge active={o.is_active} /></td>
+                                                <td className="px-3 py-2 text-right">
                                                     <Button variant="ghost" size="icon" className="h-8 w-8" asChild aria-label="Edit override">
                                                         <Link href={`/admin/event-availability/overrides?config_id=${id}&edit=${o.id}`}><Pencil /></Link>
                                                     </Button>
@@ -266,7 +266,7 @@ export function ConfigForm({ id }: { id?: number }) {
                     </div>
                 </div>
 
-                <div className="space-y-5 xl:sticky xl:top-6">
+                <div className="space-y-4 xl:sticky xl:top-6">
                     <SectionCard icon={<ClipboardList />} title="Configuration Summary" className="border-primary/20">
                         <InfoRow icon={<Users />} label="Scope" value="All Organizers" />
                         <InfoRow icon={<Tag />} label="Event Category" value={catName} />
@@ -286,7 +286,7 @@ export function ConfigForm({ id }: { id?: number }) {
                     </SectionCard>
 
                     <SectionCard icon={<Info />} title="How It Works?" className="bg-sky-50/40">
-                        <ol className="space-y-3 text-sm">
+                        <ol className="space-y-2 text-[13px]">
                             {[
                                 "Super Admin sets the event availability rules (daily limit, date range, category).",
                                 "Organizers see only available dates and the balance count while creating an event.",

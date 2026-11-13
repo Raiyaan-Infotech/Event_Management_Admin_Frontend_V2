@@ -93,7 +93,7 @@ function FormFields({ form, configs, stacked }: { form: ReturnType<typeof useOve
             <div className={stacked ? "" : "md:col-span-2"}>
                 <FieldLabel required>Availability Config</FieldLabel>
                 <Select value={f.config_id} onValueChange={(v) => set("config_id", v)}>
-                    <SelectTrigger className="h-10">
+                    <SelectTrigger className="h-9">
                         <SelectValue placeholder="Choose config">{cfg ? `${cfg.name} · ${cfg.category_name} · ${prettyRange(cfg.start_date, cfg.end_date)}` : "Choose config"}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
@@ -120,7 +120,7 @@ function FormFields({ form, configs, stacked }: { form: ReturnType<typeof useOve
             <div>
                 <FieldLabel required>Override Type</FieldLabel>
                 <Select value={f.override_type} onValueChange={(v) => set("override_type", v as OverrideType)}>
-                    <SelectTrigger className="h-10"><SelectValue>{TYPES.find((t) => t.value === f.override_type)?.label}</SelectValue></SelectTrigger>
+                    <SelectTrigger className="h-9"><SelectValue>{TYPES.find((t) => t.value === f.override_type)?.label}</SelectValue></SelectTrigger>
                     <SelectContent>{TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
                 </Select>
             </div>
@@ -132,7 +132,7 @@ function FormFields({ form, configs, stacked }: { form: ReturnType<typeof useOve
                 </div>
                 <div>
                     <FieldLabel>Status</FieldLabel>
-                    <div className="flex h-10 items-center"><Switch checked={f.is_active} onCheckedChange={(v) => set("is_active", v)} onText="Active" offText="Off" /></div>
+                    <div className="flex h-9 items-center"><Switch checked={f.is_active} onCheckedChange={(v) => set("is_active", v)} onText="Active" offText="Off" /></div>
                 </div>
             </div>
             <div className={stacked ? "" : "md:col-span-2"}>
@@ -197,7 +197,7 @@ export function OverridesContent() {
     const setActive = (o: AvailabilityOverride, v: boolean) => statusMut.mutate({ id: o.id, is_active: v }, { onError: (e) => toast.error(errorMessage(e)) });
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <PageHeader
                 title="Special Limits Override"
                 description="Set custom event booking limits for specific dates (e.g., festivals, high-demand days, or special occasions)."
@@ -205,12 +205,12 @@ export function OverridesContent() {
                 action={<Button variant="outline" asChild><Link href="/admin/event-availability"><CalendarDays />Daily Booking</Link></Button>}
             />
 
-            <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
-                    <p className="mb-3 flex items-center gap-2 text-lg font-semibold"><Info className="h-5 w-5 text-primary" />What is Special Limits Override?</p>
+            <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                    <p className="mb-2 flex items-center gap-2 text-[15px] font-semibold"><Info className="h-4 w-4 text-primary" />What is Special Limits Override?</p>
                     <p className="border-b border-primary/10 pb-4 text-sm">It allows you to set a different daily event limit for specific date(s) instead of the default limit.</p>
                     <p className="mb-2 mt-4 font-semibold text-primary">Use Cases:</p>
-                    <ul className="space-y-2 text-sm">
+                    <ul className="space-y-1.5 text-[13px]">
                         {["Increase limits for high-demand dates (e.g., wedding season, holidays).", "Reduce limits for maintenance or resource constraints.",
                             "Block a date completely (set limit to 0) if no events are allowed."].map((t) => (
                             <li key={t} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{t}</li>
@@ -239,10 +239,10 @@ export function OverridesContent() {
                     {isFetching && !isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                     <div className="relative w-72">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input className="h-10 pl-9" placeholder="Search by date, reason, or status..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+                        <Input className="h-9 pl-9" placeholder="Search by date, reason, or status..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
                     </div>
                     <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-                        <SelectTrigger className="h-10 w-44"><Filter className="mr-2 h-4 w-4" /><SelectValue>{{ all: "All Statuses", active: "Active", inactive: "Inactive" }[status]}</SelectValue></SelectTrigger>
+                        <SelectTrigger className="h-9 w-44"><Filter className="mr-2 h-4 w-4" /><SelectValue>{{ all: "All Statuses", active: "Active", inactive: "Inactive" }[status]}</SelectValue></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Statuses</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
@@ -257,12 +257,12 @@ export function OverridesContent() {
                     </p>
                 )}
                 <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-[13px]">
                         <thead className="bg-muted/40 text-left text-xs font-semibold text-muted-foreground">
                             <tr>
-                                <th className="w-10 px-4 py-3"><Checkbox checked={allOnPage} onCheckedChange={toggleAll} aria-label="Select all" /></th>
+                                <th className="w-10 px-3 py-2.5"><Checkbox checked={allOnPage} onCheckedChange={toggleAll} aria-label="Select all" /></th>
                                 {["#", "Date / Date Range", "Type", "Default Limit", "Override Limit", "Booked", "Balance", "Status", "Reason / Notes", "Actions"].map((h) => (
-                                    <th key={h} className="whitespace-nowrap px-4 py-3">{h}</th>
+                                    <th key={h} className="whitespace-nowrap px-3 py-2.5">{h}</th>
                                 ))}
                             </tr>
                         </thead>
@@ -273,17 +273,17 @@ export function OverridesContent() {
                                 <tr><td colSpan={11} className="py-16 text-center text-muted-foreground">No overrides yet.</td></tr>
                             ) : rows.map((o, i) => (
                                 <tr key={o.id} className="border-t hover:bg-muted/20">
-                                    <td className="px-4 py-3"><Checkbox checked={selected.includes(o.id)} onCheckedChange={(v) => setSelected(v ? [...selected, o.id] : selected.filter((x) => x !== o.id))} aria-label={`Select ${o.code}`} /></td>
-                                    <td className="px-4 py-3">{(page - 1) * 10 + i + 1}</td>
-                                    <td className="whitespace-nowrap px-4 py-3 font-medium">{prettyRange(o.start_date, o.end_date)}<p className="text-xs font-normal text-muted-foreground">{o.category_name}</p></td>
-                                    <td className="px-4 py-3"><OverrideTypeBadge type={o.type} /></td>
-                                    <td className="px-4 py-3 text-center">{o.default_limit}</td>
-                                    <td className="px-4 py-3 text-center font-bold">{o.override_limit ?? "—"}</td>
-                                    <td className="px-4 py-3 text-center">{o.booked}</td>
-                                    <td className="px-4 py-3 text-center">{o.balance}</td>
-                                    <td className="px-4 py-3"><ActiveBadge active={o.is_active} /></td>
-                                    <td className="max-w-[220px] px-4 py-3 text-xs">{o.reason || "—"}</td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-3 py-2"><Checkbox checked={selected.includes(o.id)} onCheckedChange={(v) => setSelected(v ? [...selected, o.id] : selected.filter((x) => x !== o.id))} aria-label={`Select ${o.code}`} /></td>
+                                    <td className="px-3 py-2">{(page - 1) * 10 + i + 1}</td>
+                                    <td className="whitespace-nowrap px-3 py-2 font-medium">{prettyRange(o.start_date, o.end_date)}<p className="text-xs font-normal text-muted-foreground">{o.category_name}</p></td>
+                                    <td className="px-3 py-2"><OverrideTypeBadge type={o.type} /></td>
+                                    <td className="px-3 py-2 text-center">{o.default_limit}</td>
+                                    <td className="px-3 py-2 text-center font-bold">{o.override_limit ?? "—"}</td>
+                                    <td className="px-3 py-2 text-center">{o.booked}</td>
+                                    <td className="px-3 py-2 text-center">{o.balance}</td>
+                                    <td className="px-3 py-2"><ActiveBadge active={o.is_active} /></td>
+                                    <td className="max-w-[220px] px-3 py-2 text-xs">{o.reason || "—"}</td>
+                                    <td className="px-3 py-2">
                                         <div className="flex items-center gap-1">
                                             <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="View details" onClick={() => setViewId(o.id)}><Eye /></Button>
                                             <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Edit override" onClick={() => setEditRow(o)}><Pencil /></Button>
@@ -357,13 +357,13 @@ function DetailsSheet({ id, onClose, onEdit }: { id?: number; onClose: () => voi
     return (
         <Sheet open={!!id} onOpenChange={(v) => !v && onClose()}>
             <SheetContent className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:w-[500px]">
-                <SheetHeader className="border-b p-5 pr-12">
+                <SheetHeader className="border-b p-4 pr-12">
                     <div className="flex items-start gap-3">
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><CalendarClock className="h-5 w-5" /></span>
-                        <div><SheetTitle className="text-xl">Override Details</SheetTitle><SheetDescription>View the complete information for this special limit override.</SheetDescription></div>
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><CalendarClock className="h-5 w-5" /></span>
+                        <div><SheetTitle className="text-base">Override Details</SheetTitle><SheetDescription>View the complete information for this special limit override.</SheetDescription></div>
                     </div>
                 </SheetHeader>
-                <div className="flex-1 space-y-5 p-5">
+                <div className="flex-1 space-y-4 p-4">
                     {isLoading || !o ? (
                         <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Loading…</p>
                     ) : (
@@ -374,7 +374,7 @@ function DetailsSheet({ id, onClose, onEdit }: { id?: number; onClose: () => voi
                                     <button type="button" aria-label="Copy override ID" onClick={() => { navigator.clipboard?.writeText(o.code); toast.success("Copied"); }}><Copy className="h-3.5 w-3.5" /></button>
                                 </span>
                             </div>
-                            <div className="rounded-xl border p-4">
+                            <div className="rounded-lg border p-3">
                                 <InfoRow icon={<CalendarDays />} label="Date / Date Range" value={prettyRange(o.start_date, o.end_date)} />
                                 <InfoRow icon={<FileText />} label="Config" value={`${o.config_name} · ${o.category_name}`} />
                                 <InfoRow icon={<Layers />} label="Type" value={<OverrideTypeBadge type={o.type} />} />
@@ -386,7 +386,7 @@ function DetailsSheet({ id, onClose, onEdit }: { id?: number; onClose: () => voi
                                 <InfoRow icon={<FileText />} label="Reason / Notes" value={o.reason || "—"} />
                             </div>
                             {o.override_limit !== null && (
-                                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
                                     <p className="mb-3 flex items-center gap-2 font-semibold"><BarChart3 className="h-4 w-4 text-primary" />Impact Summary</p>
                                     <div className="grid grid-cols-3 gap-2 text-center">
                                         <div><p className="text-xs text-muted-foreground">Limit Change</p><p className={`text-xl font-bold ${o.override_limit - o.default_limit >= 0 ? "text-emerald-600" : "text-red-600"}`}>{o.override_limit - o.default_limit >= 0 ? "+" : ""}{o.override_limit - o.default_limit}</p><p className="text-xs text-muted-foreground">({o.default_limit} → {o.override_limit})</p></div>
@@ -395,7 +395,7 @@ function DetailsSheet({ id, onClose, onEdit }: { id?: number; onClose: () => voi
                                     </div>
                                 </div>
                             )}
-                            <div className="rounded-xl border p-4">
+                            <div className="rounded-lg border p-3">
                                 <p className="mb-2 flex items-center gap-2 font-semibold"><Clock className="h-4 w-4 text-primary" />Audit Information</p>
                                 <InfoRow icon={<User />} label="Created By" value={o.created_by_name || "—"} />
                                 <InfoRow icon={<CalendarDays />} label="Created On" value={prettyDateTime(o.created_at)} />
@@ -420,13 +420,13 @@ function EditSheet({ row, configs, onClose }: { row: AvailabilityOverride | null
     return (
         <Sheet open={!!row} onOpenChange={(v) => !v && onClose()}>
             <SheetContent className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:w-[500px]">
-                <SheetHeader className="border-b p-5 pr-12">
+                <SheetHeader className="border-b p-4 pr-12">
                     <div className="flex items-start gap-3">
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Pencil className="h-5 w-5" /></span>
-                        <div><SheetTitle className="text-xl">Edit Special Limit Override</SheetTitle><SheetDescription>Update the override limit, date, status, or reason for this entry.</SheetDescription></div>
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><Pencil className="h-5 w-5" /></span>
+                        <div><SheetTitle className="text-base">Edit Special Limit Override</SheetTitle><SheetDescription>Update the override limit, date, status, or reason for this entry.</SheetDescription></div>
                     </div>
                 </SheetHeader>
-                <div className="flex-1 p-5">{row && <FormFields form={form} configs={configs} stacked />}</div>
+                <div className="flex-1 p-4">{row && <FormFields form={form} configs={configs} stacked />}</div>
                 <div className="flex justify-end gap-3 border-t p-4">
                     <Button variant="outline" disabled={form.saving} onClick={onClose}>Cancel</Button>
                     <Button isLoading={form.saving} onClick={form.save}>{!form.saving && <Save />}{form.saving ? "Saving..." : "Save Changes"}</Button>

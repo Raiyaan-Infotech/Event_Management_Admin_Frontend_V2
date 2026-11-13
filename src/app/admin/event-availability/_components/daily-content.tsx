@@ -54,7 +54,7 @@ export function DailyContent() {
         action.mutate({ configId: row.config_id, date: row.date, body }, { onError: (e) => toast.error(errorMessage(e)) });
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <PageHeader
                 title="Daily Event Booking Availability"
                 description="Manage configured daily event booking limits, booked counts and balance status."
@@ -67,7 +67,7 @@ export function DailyContent() {
                 }
             />
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard icon={<CalendarDays />} label="Total Configured Dates" value={stats?.configured ?? "—"} />
                 <StatCard icon={<CalendarCheck />} label="Available Dates" value={stats?.available ?? "—"} tone="green" />
                 <StatCard icon={<CalendarX2 />} label="Fully Booked Dates" value={stats?.fully_booked ?? "—"} tone="red" />
@@ -77,21 +77,21 @@ export function DailyContent() {
             <SectionCard icon={<ListChecks />} title="Filter">
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_1.3fr_auto] xl:items-end">
                     <div>
-                        <p className="mb-1.5 text-sm font-medium">From</p>
+                        <p className="mb-1 text-[13px] font-medium">From</p>
                         <DatePicker value={from} onChange={(v) => { setFrom(v); setPage(1); }} />
                     </div>
                     <div>
-                        <p className="mb-1.5 text-sm font-medium">To</p>
+                        <p className="mb-1 text-[13px] font-medium">To</p>
                         <DatePicker value={to} onChange={(v) => { setTo(v); setPage(1); }} />
                     </div>
                     <div>
-                        <p className="mb-1.5 text-sm font-medium">Category</p>
+                        <p className="mb-1 text-[13px] font-medium">Category</p>
                         <CategorySelect value={category} onChange={(v) => { setCategory(v); setPage(1); }} />
                     </div>
                     <div>
-                        <p className="mb-1.5 text-sm font-medium">Status</p>
+                        <p className="mb-1 text-[13px] font-medium">Status</p>
                         <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-                            <SelectTrigger className="h-10"><SelectValue>{STATUS_LABEL[status]}</SelectValue></SelectTrigger>
+                            <SelectTrigger className="h-9"><SelectValue>{STATUS_LABEL[status]}</SelectValue></SelectTrigger>
                             <SelectContent>
                                 {Object.entries(STATUS_LABEL).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}
                             </SelectContent>
@@ -99,19 +99,19 @@ export function DailyContent() {
                     </div>
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input className="h-10 pl-9" placeholder="Search by date, category..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+                        <Input className="h-9 pl-9" placeholder="Search by date, category..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
                     </div>
-                    <Button variant="outline" className="h-10" onClick={reset}><RotateCcw />Reset</Button>
+                    <Button variant="outline" className="h-9" onClick={reset}><RotateCcw />Reset</Button>
                 </div>
             </SectionCard>
 
             <SectionCard icon={<CalendarDays />} title="Booked Dates List" action={isFetching && !isLoading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}>
                 <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-[13px]">
                         <thead className="bg-muted/40 text-left text-xs font-semibold text-muted-foreground">
                             <tr>
                                 {["Date", "Day", "Category", "Daily Max Events", "Created Events", "Balance Slots", "Status", "Last Updated", ""].map((h) => (
-                                    <th key={h} className="whitespace-nowrap px-4 py-3">{h}</th>
+                                    <th key={h} className="whitespace-nowrap px-3 py-2.5">{h}</th>
                                 ))}
                             </tr>
                         </thead>
@@ -126,15 +126,15 @@ export function DailyContent() {
                                 </td></tr>
                             ) : rows.map((r) => (
                                 <tr key={`${r.config_id}-${r.date}`} className="border-t hover:bg-muted/20">
-                                    <td className="whitespace-nowrap px-4 py-3 font-medium"><span className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4 text-muted-foreground" />{prettyDate(r.date)}</span></td>
-                                    <td className="px-4 py-3">{r.day}</td>
-                                    <td className="px-4 py-3">{r.category_name}</td>
-                                    <td className="px-4 py-3 text-center">{r.daily_max}</td>
-                                    <td className="px-4 py-3 text-center">{r.booked}</td>
-                                    <td className="px-4 py-3 text-center font-semibold">{r.balance}</td>
-                                    <td className="px-4 py-3"><DayStatusBadge status={r.status} /></td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{prettyDateTime(r.last_updated)}</td>
-                                    <td className="px-4 py-3 text-right">
+                                    <td className="whitespace-nowrap px-3 py-2 font-medium"><span className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4 text-muted-foreground" />{prettyDate(r.date)}</span></td>
+                                    <td className="px-3 py-2">{r.day}</td>
+                                    <td className="px-3 py-2">{r.category_name}</td>
+                                    <td className="px-3 py-2 text-center">{r.daily_max}</td>
+                                    <td className="px-3 py-2 text-center">{r.booked}</td>
+                                    <td className="px-3 py-2 text-center font-semibold">{r.balance}</td>
+                                    <td className="px-3 py-2"><DayStatusBadge status={r.status} /></td>
+                                    <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">{prettyDateTime(r.last_updated)}</td>
+                                    <td className="px-3 py-2 text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="outline" size="icon" className="h-8 w-8" aria-label="Actions"><MoreHorizontal /></Button>

@@ -57,6 +57,7 @@ import {
   CalendarClock,
   CalendarDays,
   CalendarRange,
+  Inbox,
 } from "lucide-react";
 import {
   Sidebar,
@@ -233,6 +234,7 @@ const menuItems: MenuItem[] = [
       { labelKey: "Daily Booking", href: "/admin/event-availability", icon: CalendarDays, permission: "event_availability.view" },
       { labelKey: "Availability Configs", href: "/admin/event-availability/configs", icon: Settings, permission: "event_availability.view" },
       { labelKey: "Special Limits Override", href: "/admin/event-availability/overrides", icon: CalendarRange, permission: "event_availability.view" },
+      { labelKey: "Allocation Requests", href: "/admin/event-availability/requests", icon: Inbox, permission: "event_availability.view" },
     ],
   },
   {

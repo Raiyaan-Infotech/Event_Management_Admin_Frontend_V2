@@ -273,3 +273,57 @@ export const useUpdateOverride = () => useAvailabilityMutation(api.updateOverrid
 export const useOverrideStatus = () => useAvailabilityMutation(api.overrideStatus);
 export const useDeleteOverride = () => useAvailabilityMutation(api.deleteOverride);
 export const useBulkOverrides = () => useAvailabilityMutation(api.bulkOverrides);
+
+/* --------------------------------------------------- allocation requests -- */
+
+export type RequestStatus = 'pending' | 'approved' | 'rejected';
+
+export interface AllocationRequest {
+    id: number;
+    ticket_no: string;
+    booking_type: 'single' | 'multiple';
+    start_date: string;
+    end_date: string;
+    unavailable_dates: { date: string; status: string }[];
+    contact_method: 'call' | 'email';
+    contact_name: string;
+    contact_mobile: string | null;
+    contact_email: string | null;
+    preferred_call_time: string | null;
+    subject: string | null;
+    message: string;
+    attachment_url: string | null;
+    attachment_name: string | null;
+    status: RequestStatus;
+    decision_reason: string | null;
+    decision: {
+        dates?: string[]; exception_slots?: number; expiry_hours?: number; expires_at?: string;
+        capacity_checked?: boolean; category?: string; used_event_id?: number; used_at?: string;
+    } | null;
+    decided_at: string | null;
+    decided_by_name?: string | null;
+    created_at: string;
+    client: { id: number; name: string | null; email: string | null; mobile: string | null; company_name: string | null };
+    days?: { date: string; day: string; status: string; daily_max: number; booked: number; balance: number }[];
+}
+
+export const REJECT_CATEGORIES = ['No capacity available', 'Date blocked by admin', 'Incomplete information', 'Duplicate request', 'Other'];
+
+const reqApi = {
+    list: async (params: Record<string, unknown>): Promise<{ stats: { total: number; pending: number; approved: number; rejected: number }; data: AllocationRequest[]; pagination: Pagination }> =>
+        (await apiClient.get(`${PATH}/requests`, { params })).data.data,
+    one: async (id: number | string): Promise<AllocationRequest> => (await apiClient.get(`${PATH}/requests/${id}`)).data.data,
+    approve: async ({ id, body }: { id: number; body: { exception_slots: number; expiry_hours: number; capacity_checked: boolean; reason: string; dates?: string[] } }) =>
+        (await apiClient.post(`${PATH}/requests/${id}/approve`, body)).data,
+    reject: async ({ id, body }: { id: number; body: { category: string; reason: string } }) =>
+        (await apiClient.post(`${PATH}/requests/${id}/reject`, body)).data,
+};
+
+export function useAllocationRequests(params: Record<string, unknown>) {
+    return useQuery({ queryKey: [...KEY, 'requests', params], queryFn: () => reqApi.list(params) });
+}
+export function useAllocationRequest(id?: number | string) {
+    return useQuery({ queryKey: [...KEY, 'request', id], queryFn: () => reqApi.one(id!), enabled: !!id });
+}
+export const useApproveRequest = () => useAvailabilityMutation(reqApi.approve);
+export const useRejectRequest = () => useAvailabilityMutation(reqApi.reject);

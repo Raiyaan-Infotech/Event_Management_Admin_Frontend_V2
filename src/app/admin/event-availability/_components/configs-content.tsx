@@ -70,7 +70,7 @@ export function ConfigsContent() {
                                         <Switch
                                             checked={!!c.is_active}
                                             pending={busyId === c.id}
-                                            onText="Active" offText="Off"
+                                            onText="ON" offText="OFF"
                                             onCheckedChange={(v) => {
                                                 setBusyId(c.id);
                                                 status.mutate({ id: c.id, is_active: v }, {

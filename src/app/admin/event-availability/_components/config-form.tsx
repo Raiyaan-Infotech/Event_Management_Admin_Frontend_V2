@@ -138,7 +138,7 @@ export function ConfigForm({ id }: { id?: number }) {
                             </div>
                             <div>
                                 <FieldLabel>Status</FieldLabel>
-                                <div className="flex h-9 items-center"><Switch checked={f.is_active} onCheckedChange={(v) => set("is_active", v)} onText="Active" offText="Off" /></div>
+                                <div className="flex h-9 items-center gap-2"><Switch checked={f.is_active} onCheckedChange={(v) => set("is_active", v)} onText="ON" offText="OFF" /><span className="text-[13px] text-muted-foreground">{f.is_active ? "Active" : "Inactive"}</span></div>
                             </div>
                         </div>
                     </SectionCard>
@@ -151,12 +151,12 @@ export function ConfigForm({ id }: { id?: number }) {
                             </div>
                             <div>
                                 <FieldLabel required>Start Date</FieldLabel>
-                                <DatePicker value={f.start_date} onChange={(v) => set("start_date", v)} />
+                                <div className="[&_button]:w-full [&>div]:w-full"><DatePicker value={f.start_date} onChange={(v) => set("start_date", v)} /></div>
                                 {err("start_date")}
                             </div>
                             <div>
                                 <FieldLabel required>End Date</FieldLabel>
-                                <DatePicker value={f.end_date} onChange={(v) => set("end_date", v)} />
+                                <div className="[&_button]:w-full [&>div]:w-full"><DatePicker value={f.end_date} onChange={(v) => set("end_date", v)} /></div>
                                 {err("end_date")}
                             </div>
                             <div>

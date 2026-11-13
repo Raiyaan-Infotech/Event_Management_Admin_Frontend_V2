@@ -113,8 +113,8 @@ function FormFields({ form, configs, stacked }: { form: ReturnType<typeof useOve
                 </div>
             </div>
             <div className={f.range ? "grid grid-cols-2 gap-2" : ""}>
-                <div><FieldLabel required>{f.range ? "From" : "Date"}</FieldLabel><DatePicker value={f.start_date} onChange={(v) => set("start_date", v)} /></div>
-                {f.range && <div><FieldLabel required>To</FieldLabel><DatePicker value={f.end_date} onChange={(v) => set("end_date", v)} /></div>}
+                <div><FieldLabel required>{f.range ? "From" : "Date"}</FieldLabel><div className="[&_button]:w-full [&>div]:w-full"><DatePicker value={f.start_date} onChange={(v) => set("start_date", v)} /></div></div>
+                {f.range && <div><FieldLabel required>To</FieldLabel><div className="[&_button]:w-full [&>div]:w-full"><DatePicker value={f.end_date} onChange={(v) => set("end_date", v)} /></div></div>}
             </div>
             <div>
                 <FieldLabel required>Override Type</FieldLabel>
@@ -131,7 +131,7 @@ function FormFields({ form, configs, stacked }: { form: ReturnType<typeof useOve
                 </div>
                 <div>
                     <FieldLabel>Status</FieldLabel>
-                    <div className="flex h-9 items-center"><Switch checked={f.is_active} onCheckedChange={(v) => set("is_active", v)} onText="Active" offText="Off" /></div>
+                    <div className="flex h-9 items-center gap-2"><Switch checked={f.is_active} onCheckedChange={(v) => set("is_active", v)} onText="ON" offText="OFF" /><span className="text-[13px] text-muted-foreground">{f.is_active ? "Active" : "Inactive"}</span></div>
                 </div>
             </div>
             <div className={stacked ? "" : "md:col-span-2"}>

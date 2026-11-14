@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-    ArrowLeft, CalendarDays, CheckCircle2, Clock, Info, Loader2, Mail, Paperclip, Phone, ShieldCheck, User, XCircle,
+    ArrowLeft, Ban, CalendarDays, CheckCircle2, Clock, Info, Loader2, Mail, Paperclip, Phone, ShieldCheck, User, XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,9 +76,11 @@ export function RequestDetail({ id }: { id: number }) {
     };
 
     const title = r.status === "approved" ? "Allocation Request Approved" : r.status === "rejected" ? "Allocation Request Rejected"
+        : r.status === "cancelled" ? "Allocation Request Cancelled"
         : mode === "approve" ? "Override Allocation for This Request" : "Allocation Request Details";
     const subtitle = r.status === "approved" ? "The request-specific exception is reserved; the client can now complete event creation."
         : r.status === "rejected" ? "The request was declined; the existing date limits and bookings remain unchanged."
+            : r.status === "cancelled" ? "The client cancelled this request before a decision; no action is needed."
             : mode === "approve" ? "Reserve an exception for this client and request only — the global daily booking limit does not change."
                 : "Check booking limits, client information and the requested dates before making a decision.";
 
@@ -98,6 +100,11 @@ export function RequestDetail({ id }: { id: number }) {
                 <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50/70 p-4">
                     <XCircle className="mt-0.5 h-6 w-6 shrink-0 text-red-500" />
                     <div className="text-[13px]"><p className="font-semibold text-red-600">Request {r.ticket_no} rejected</p><p>No additional booking slot was reserved. The existing date limits and bookings remain unchanged.</p></div>
+                </div>
+            ) : r.status === "cancelled" ? (
+                <div className="flex items-start gap-3 rounded-lg border border-slate-300 bg-slate-50 p-4">
+                    <Ban className="mt-0.5 h-6 w-6 shrink-0 text-slate-500" />
+                    <div className="text-[13px]"><p className="font-semibold text-slate-700">Request {r.ticket_no} cancelled by the client</p><p>Cancelled on {prettyDateTime(r.decided_at)}, usually to raise a new request for the same date. No slot was reserved.</p></div>
                 </div>
             ) : (
                 <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
@@ -198,7 +205,7 @@ export function RequestDetail({ id }: { id: number }) {
                         )}
                     </SectionCard>
 
-                    {r.status !== "pending" && (
+                    {(r.status === "approved" || r.status === "rejected") && (
                         <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
                             <SectionCard icon={r.status === "approved" ? <CheckCircle2 /> : <XCircle />} title={r.status === "approved" ? "Approved Allocation" : "Rejection Details"}>
                                 {r.status === "approved" ? (

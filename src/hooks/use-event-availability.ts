@@ -276,7 +276,8 @@ export const useBulkOverrides = () => useAvailabilityMutation(api.bulkOverrides)
 
 /* --------------------------------------------------- allocation requests -- */
 
-export type RequestStatus = 'pending' | 'approved' | 'rejected';
+/** `cancelled` = the client withdrew a pending request (to raise a new one for the same date). */
+export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
 export interface AllocationRequest {
     id: number;
@@ -310,7 +311,7 @@ export interface AllocationRequest {
 export const REJECT_CATEGORIES = ['No capacity available', 'Date blocked by admin', 'Incomplete information', 'Duplicate request', 'Other'];
 
 const reqApi = {
-    list: async (params: Record<string, unknown>): Promise<{ stats: { total: number; pending: number; approved: number; rejected: number }; data: AllocationRequest[]; pagination: Pagination }> =>
+    list: async (params: Record<string, unknown>): Promise<{ stats: { total: number; pending: number; approved: number; rejected: number; cancelled?: number }; data: AllocationRequest[]; pagination: Pagination }> =>
         (await apiClient.get(`${PATH}/requests`, { params })).data.data,
     one: async (id: number | string): Promise<AllocationRequest> => (await apiClient.get(`${PATH}/requests/${id}`)).data.data,
     approve: async ({ id, body }: { id: number; body: { exception_slots: number; expiry_hours: number; capacity_checked: boolean; reason: string; dates?: string[] } }) =>

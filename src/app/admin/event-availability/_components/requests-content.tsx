@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Clock, Eye, Inbox, Loader2, Mail, MoreHorizontal, Phone, RotateCcw, Search, ShieldCheck, XCircle } from "lucide-react";
+import { Ban, CheckCircle2, Clock, Eye, Inbox, Loader2, Mail, MoreHorizontal, Phone, RotateCcw, Search, ShieldCheck, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -19,6 +19,7 @@ export const REQUEST_STATUS: Record<RequestStatus, { label: string; cls: string 
     pending: { label: "Pending Review", cls: "border-amber-200 bg-amber-50 text-amber-700" },
     approved: { label: "Approved", cls: "border-emerald-200 bg-emerald-50 text-emerald-700" },
     rejected: { label: "Rejected", cls: "border-red-200 bg-red-50 text-red-600" },
+    cancelled: { label: "Cancelled", cls: "border-slate-300 bg-slate-100 text-slate-600" },
 };
 
 export function RequestStatusBadge({ status }: { status: RequestStatus }) {
@@ -26,7 +27,7 @@ export function RequestStatusBadge({ status }: { status: RequestStatus }) {
     return <span className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap ${s.cls}`}>{s.label}</span>;
 }
 
-const STATUS_LABEL: Record<string, string> = { all: "All Statuses", pending: "Pending Review", approved: "Approved", rejected: "Rejected" };
+const STATUS_LABEL: Record<string, string> = { all: "All Statuses", pending: "Pending Review", approved: "Approved", rejected: "Rejected", cancelled: "Cancelled" };
 
 export function RequestsContent() {
     const router = useRouter();
@@ -47,11 +48,12 @@ export function RequestsContent() {
         <div className="space-y-4 [&_input]:text-[13px] [&_textarea]:text-[13px]">
             <ModuleHeader title="Event Allocation Requests" description="Review client requests for dates that are fully booked or not open." />
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 <StatCard icon={<Inbox />} label="Total Requests" value={stats?.total ?? "—"} />
                 <StatCard icon={<Clock />} label="Pending Review" value={stats?.pending ?? "—"} tone="muted" />
                 <StatCard icon={<CheckCircle2 />} label="Approved" value={stats?.approved ?? "—"} tone="green" />
                 <StatCard icon={<XCircle />} label="Rejected" value={stats?.rejected ?? "—"} tone="red" />
+                <StatCard icon={<Ban />} label="Cancelled by Client" value={stats?.cancelled ?? 0} tone="muted" />
             </div>
 
             <SectionCard icon={<Search />} title="Filter">

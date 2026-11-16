@@ -109,7 +109,7 @@ export function RequestsContent() {
                                     <td className="px-2.5 py-2 text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild><Button variant="outline" size="icon" className="h-7 w-7" aria-label="Actions"><MoreHorizontal /></Button></DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-48">
+                                            <DropdownMenuContent align="end" className="w-auto min-w-48 [&_[role=menuitem]]:justify-start [&_[role=menuitem]]:whitespace-nowrap [&_[role=menuitem]]:text-left">
                                                 <DropdownMenuItem onClick={() => router.push(`/admin/event-availability/requests/${r.id}`)}><Eye className="mr-2 h-4 w-4" />View Request</DropdownMenuItem>
                                                 {r.status === "pending" && (
                                                     <>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-    Activity, BarChart3, CalendarClock, CalendarDays, CheckCircle2, CircleSlash, Clock, Copy, Eye, FileText, Info,
+    Activity, BarChart3, CalendarClock, CalendarDays, CheckCircle2, CircleSlash, Clock, Copy, Eye, FileText,
     Layers, ListChecks, Loader2, MoreVertical, Pencil, PlusCircle, Save, Scale, Search, Trash2, User,
 } from "lucide-react";
 import { PageLoader } from "@/components/common/page-loader";
@@ -238,34 +238,19 @@ export function OverridesContent() {
                 action={<Button variant="outline" asChild><Link href="/admin/event-availability"><CalendarDays />Daily Booking</Link></Button>}
             />
 
-            <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
-                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                    <p className="mb-2 flex items-center gap-2 text-[15px] font-semibold"><Info className="h-4 w-4 text-primary" />What is Special Limits Override?</p>
-                    <p className="border-b border-primary/10 pb-4 text-sm">It allows you to set a different daily event limit for specific date(s) instead of the default limit.</p>
-                    <p className="mb-2 mt-4 font-semibold text-primary">Use Cases:</p>
-                    <ul className="space-y-1.5 text-[13px]">
-                        {["Increase limits for high-demand dates (e.g., wedding season, holidays).", "Reduce limits for maintenance or resource constraints.",
-                            "Block a date completely (set limit to 0) if no events are allowed."].map((t) => (
-                            <li key={t} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{t}</li>
-                        ))}
-                    </ul>
-                    <p className="mt-4 text-xs text-muted-foreground">A limit can never go below the events already booked. To stop new bookings and keep them, use Mark Fully Booked or Disable Date.</p>
-                </div>
-
-                <SectionCard icon={<PlusCircle />} title="Add Special Limit Override">
-                    {!configs.length ? (
-                        <p className="py-6 text-center text-sm text-muted-foreground">Create an availability config first. <Link href="/admin/event-availability/create" className="font-medium text-primary hover:underline">Create Config</Link></p>
-                    ) : (
-                        <>
-                            <FormFields form={add} configs={configs} />
-                            <div className="mt-4 flex justify-end gap-3">
-                                <Button variant="outline" disabled={add.saving} onClick={() => setAddInitial(emptyForm(presetConfig))}>Cancel</Button>
-                                <Button isLoading={add.saving} onClick={add.save}>{!add.saving && <Save />}{add.saving ? "Saving..." : "Save Override"}</Button>
-                            </div>
-                        </>
-                    )}
-                </SectionCard>
-            </div>
+            <SectionCard icon={<PlusCircle />} title="Add Special Limit Override">
+                {!configs.length ? (
+                    <p className="py-6 text-center text-sm text-muted-foreground">Create an availability config first. <Link href="/admin/event-availability/create" className="font-medium text-primary hover:underline">Create Config</Link></p>
+                ) : (
+                    <>
+                        <FormFields form={add} configs={configs} />
+                        <div className="mt-4 flex justify-end gap-3">
+                            <Button variant="outline" disabled={add.saving} onClick={() => setAddInitial(emptyForm(presetConfig))}>Cancel</Button>
+                            <Button isLoading={add.saving} onClick={add.save}>{!add.saving && <Save />}{add.saving ? "Saving..." : "Save Override"}</Button>
+                        </div>
+                    </>
+                )}
+            </SectionCard>
 
             <SectionCard icon={<ListChecks />} title="Special Limits Override List" action={
                 <div className="flex shrink-0 flex-nowrap items-center gap-2">

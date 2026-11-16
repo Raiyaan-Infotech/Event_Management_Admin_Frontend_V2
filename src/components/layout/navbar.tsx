@@ -18,6 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { TopHeader } from "@/components/layout/top-header";
+import Breadcrumb from "@/components/layout/breadcrumb";
 import { useAuth, useLogout } from "@/hooks";
 import { usePendingCount, useApprovals } from "@/hooks/use-approvals";
 import { useMailNotifications, useMarkNotificationsRead } from "@/hooks/use-admin-mail";
@@ -48,15 +50,15 @@ export default function AdminNavbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b-2 border-slate-200/90 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 items-center px-4 gap-4">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-card">
+      <div className="flex h-14 items-center gap-3 px-4">
         {/* Sidebar Trigger */}
         <SidebarTrigger className="-ml-1" />
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-5" />
 
-        {/* Spacer */}
-        <div className="flex-1" />
+        {/* Breadcrumb */}
+        <div className="min-w-0 flex-1"><Breadcrumb /></div>
 
         {/* Search — full bar on md+, icon-only on mobile */}
         <div className="hidden md:flex items-center">
@@ -65,7 +67,7 @@ export default function AdminNavbar() {
             <Input
               type="search"
               placeholder="Search..."
-              className="w-[200px] pl-8 h-9"
+              className="h-8 w-[220px] bg-muted/40 pl-8"
             />
           </div>
         </div>
@@ -74,13 +76,15 @@ export default function AdminNavbar() {
         </Button>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Language / currency / theme */}
+          <TopHeader />
           {/* Website Preview Button (Prominent in header right corner) */}
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
             asChild
-            className="h-8 px-3 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm gap-1.5"
+            className="h-8 gap-1.5 px-3 text-xs"
           >
             <Link href="/website-preview" target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-3.5 w-3.5" />
@@ -91,7 +95,7 @@ export default function AdminNavbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
-                <Mail className="h-5 w-5" />
+                <Mail className="h-[18px] w-[18px]" />
                 {mailUnread > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-medium">
                     {mailUnread > 99 ? "99+" : mailUnread}
@@ -152,7 +156,7 @@ export default function AdminNavbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5" />
+                  <Bell className="h-[18px] w-[18px]" />
                   {pendingCount > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-medium">
                       {pendingCount > 99 ? "99+" : pendingCount}
@@ -205,13 +209,17 @@ export default function AdminNavbar() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                <Avatar className="h-9 w-9">
+              <Button variant="ghost" className="relative ml-1 h-9 gap-2 rounded-lg px-1.5">
+                <Avatar className="h-8 w-8">
                   <AvatarImage src={user?.avatar || ""} alt="User" />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
+                  <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
                     {getInitials(user?.full_name)}
                   </AvatarFallback>
                 </Avatar>
+                <span className="hidden min-w-0 flex-col items-start leading-tight lg:flex">
+                  <span className="max-w-[140px] truncate text-[13px] font-semibold text-foreground">{user?.full_name}</span>
+                  <span className="max-w-[140px] truncate text-[11px] font-normal text-muted-foreground">{user?.role?.name || user?.email}</span>
+                </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">

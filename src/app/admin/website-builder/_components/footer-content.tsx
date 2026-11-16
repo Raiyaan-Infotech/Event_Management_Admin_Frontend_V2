@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { Save, Sparkles, Trash2, Phone, Mail, MapPin, Monitor, Smartphone, Lock, HelpCircle, RotateCcw, Loader2, Eye, Crop } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

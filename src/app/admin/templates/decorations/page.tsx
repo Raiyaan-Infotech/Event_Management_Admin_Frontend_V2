@@ -24,7 +24,7 @@ import {
     Save, RotateCcw, Pencil, Trash2, Loader2, UploadCloud, X, Info, ImageOff,
     Minus, Plus, Eye, Palette, Undo2,
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';

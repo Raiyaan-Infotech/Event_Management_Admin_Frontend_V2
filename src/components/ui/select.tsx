@@ -102,13 +102,13 @@ export function SelectTrigger({
             aria-expanded={open}
             onClick={() => setOpen(!open)}
             className={cn(
-                'flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 py-2 text-xs font-medium text-foreground shadow-xs outline-none transition focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50',
+                'flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 py-1.5 text-[13px] text-foreground outline-none transition-[border-color,box-shadow] duration-150 hover:border-foreground/20 focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/15 disabled:cursor-not-allowed disabled:bg-muted/50 disabled:opacity-60',
                 className
             )}
             {...props}
         >
             {children}
-            <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+            <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
         </button>
     );
 }
@@ -219,7 +219,7 @@ export function SelectContent({
                 visibility: height ? 'visible' : 'hidden',
             }}
             className={cn(
-                'overflow-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 duration-100',
+                'overflow-auto rounded-xl border border-border bg-popover p-1 text-popover-foreground shadow-[0_12px_32px_-8px_rgba(16,24,40,0.18),0_2px_6px_rgba(16,24,40,0.06)] animate-in fade-in-0 zoom-in-95 duration-150',
                 className
             )}
         >
@@ -249,8 +249,8 @@ export function SelectItem({
             type="button"
             disabled={disabled}
             className={cn(
-                'relative flex w-full cursor-pointer select-none items-center justify-between rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground font-medium disabled:cursor-not-allowed disabled:opacity-50',
-                isSelected ? 'bg-accent/80 font-bold text-primary' : '',
+                'relative flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-[13px] outline-none transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50',
+                isSelected ? 'bg-primary/10 font-medium text-primary hover:bg-primary/10' : '',
                 className
             )}
             onClick={() => {
@@ -261,7 +261,7 @@ export function SelectItem({
             }}
         >
             <span className="line-clamp-1">{children}</span>
-            {isSelected ? <Check className="h-3.5 w-3.5 text-primary shrink-0 font-bold" /> : null}
+            {isSelected ? <Check className="h-4 w-4 shrink-0 stroke-[2.5] text-primary" /> : null}
         </button>
     );
 }
@@ -273,7 +273,7 @@ export function SelectGroup({ children }: { children: React.ReactNode }) {
 export function SelectLabel({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     return (
         <div
-            className={cn('px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground', className)}
+            className={cn('px-2.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground', className)}
             {...props}
         />
     );

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { UploadCloud, Loader2, X, FileImage, Palette, Undo2 } from 'lucide-react';
 import { PageHeader } from '@/components/common/page-header';
 import { PageLoader } from '@/components/common/page-loader';

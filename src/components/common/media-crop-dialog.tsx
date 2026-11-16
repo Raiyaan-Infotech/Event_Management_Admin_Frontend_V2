@@ -1,11 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
-import { Crop, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
-import ReactCrop, {
-  type Crop as CropType,
-  type PixelCrop,
-} from "react-image-crop";
+import { useState, useCallback, useEffect } from "react";
+import { Crop, RotateCcw, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,9 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import "react-image-crop/dist/ReactCrop.css";
+import { CropArea, centerAspectCrop, getCroppedFile, type PercentCrop } from "@/components/ui/crop-area";
+import { cn } from "@/lib/utils";
 
 interface MediaCropDialogProps {
   /** Whether the dialog is open */
@@ -39,13 +35,15 @@ interface MediaCropDialogProps {
   isSaving?: boolean;
 }
 
-const DEFAULT_CROP: CropType = {
-  unit: "%",
-  width: 80,
-  height: 80,
-  x: 10,
-  y: 10,
-};
+const ASPECTS: { label: string; value: number | undefined }[] = [
+  { label: "Free", value: undefined },
+  { label: "1:1", value: 1 },
+  { label: "4:3", value: 4 / 3 },
+  { label: "3:2", value: 3 / 2 },
+  { label: "16:9", value: 16 / 9 },
+];
+
+const DEFAULT_CROP: PercentCrop = { x: 10, y: 10, width: 80, height: 80 };
 
 export function MediaCropDialog({
   open,
@@ -56,224 +54,170 @@ export function MediaCropDialog({
   onCropped,
   isSaving = false,
 }: MediaCropDialogProps) {
-  const [crop, setCrop] = useState<CropType>(DEFAULT_CROP);
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
-  const [scale, setScale] = useState(1);
-  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
-  const imgRef = useRef<HTMLImageElement>(null);
+  const [crop, setCrop] = useState<PercentCrop>(DEFAULT_CROP);
+  const [aspectIndex, setAspectIndex] = useState(0);
+  const [zoom, setZoom] = useState(1);
+  const [natural, setNatural] = useState({ width: 0, height: 0 });
+  const [working, setWorking] = useState(false);
+
+  const aspect = ASPECTS[aspectIndex].value;
 
   // Reset state whenever the dialog opens with a new image
   useEffect(() => {
     if (open) {
       setCrop(DEFAULT_CROP);
-      setCompletedCrop(null);
-      setScale(1);
-      setImageDimensions({ width: 0, height: 0 });
+      setAspectIndex(0);
+      setZoom(1);
+      setNatural({ width: 0, height: 0 });
     }
   }, [open, imageUrl]);
 
-  const onImageLoad = useCallback(
-    (e: React.SyntheticEvent<HTMLImageElement>) => {
-      const { naturalWidth, naturalHeight } = e.currentTarget;
-      setImageDimensions({ width: naturalWidth, height: naturalHeight });
-    },
-    []
-  );
-
-  const resetCrop = () => {
-    setCrop(DEFAULT_CROP);
-    setScale(1);
+  const applyAspect = (index: number) => {
+    setAspectIndex(index);
+    if (natural.width) setCrop(centerAspectCrop(natural.width, natural.height, ASPECTS[index].value, 80));
   };
 
-  // Calculate the crop area in natural pixels for the info bar
-  const cropAreaPx =
-    completedCrop && imgRef.current
-      ? {
-          width: Math.round(
-            completedCrop.width *
-              (imgRef.current.naturalWidth / imgRef.current.width)
-          ),
-          height: Math.round(
-            completedCrop.height *
-              (imgRef.current.naturalHeight / imgRef.current.height)
-          ),
-        }
-      : { width: 0, height: 0 };
+  const resetCrop = () => {
+    setZoom(1);
+    setCrop(natural.width ? centerAspectCrop(natural.width, natural.height, aspect, 80) : DEFAULT_CROP);
+  };
+
+  const selectAll = () => setCrop({ x: 0, y: 0, width: 100, height: 100 });
+
+  const cropPx = {
+    width: Math.round((crop.width / 100) * natural.width),
+    height: Math.round((crop.height / 100) * natural.height),
+  };
 
   const handleCropAndSave = useCallback(async () => {
-    if (!imgRef.current || !crop.width || !crop.height) return;
-
-    const image = imgRef.current;
-    const nW = image.naturalWidth;
-    const nH = image.naturalHeight;
-
-    // Use percent-based math — resolution independent
-    const sx = (crop.x * nW) / 100;
-    const sy = (crop.y * nH) / 100;
-    const sw = (crop.width * nW) / 100;
-    const sh = (crop.height * nH) / 100;
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    canvas.width = Math.round(sw);
-    canvas.height = Math.round(sh);
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(image, sx, sy, sw, sh, 0, 0, Math.round(sw), Math.round(sh));
-
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return;
-
-        const file = new File([blob], fileName, {
-          type: mimeType,
-          lastModified: Date.now(),
-        });
-
-        // Convert blob → data URL for instant local preview (no CDN wait)
+    if (!crop.width || !crop.height) return;
+    setWorking(true);
+    try {
+      const file = await getCroppedFile(imageUrl, crop, {
+        fileName,
+        mimeType,
+        quality: 0.98,
+        crossOrigin: "anonymous",
+      });
+      if (!file) return;
+      // Data URL for instant local preview (no CDN wait)
+      const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => {
-          const dataUrl = reader.result as string;
-          onCropped(file, dataUrl);
-        };
-        reader.readAsDataURL(blob);
-      },
-      mimeType,
-      0.98
-    );
-  }, [crop, fileName, mimeType, onCropped]);
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      onCropped(file, dataUrl);
+    } finally {
+      setWorking(false);
+    }
+  }, [crop, imageUrl, fileName, mimeType, onCropped]);
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto gap-5">
         <DialogHeader>
-          <DialogTitle>Crop Image</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Crop className="h-4 w-4" />
+            </span>
+            Crop Image
+          </DialogTitle>
           <DialogDescription>
-            Drag to select the crop area. Use zoom to scale the image.
+            Drag the box to move it, drag the handles to resize. The cropped image replaces the original file.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Dimension info bar — matches common ImageCropper style */}
-          <div className="grid grid-cols-3 gap-2 text-sm bg-muted/50 rounded-lg p-3">
-            <div className="text-center">
-              <div className="text-muted-foreground text-xs mb-1">Original</div>
-              <div className="font-semibold">
-                {imageDimensions.width > 0
-                  ? `${imageDimensions.width} × ${imageDimensions.height}px`
-                  : "—"}
-              </div>
-            </div>
-            <div className="text-center border-x">
-              <div className="text-muted-foreground text-xs mb-1">
-                Crop Area
-              </div>
-              <div className="font-semibold text-primary">
-                {cropAreaPx.width > 0
-                  ? `${cropAreaPx.width} × ${cropAreaPx.height}px`
-                  : "—"}
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-muted-foreground text-xs mb-1">Output</div>
-              <div className="font-semibold text-green-600">
-                {cropAreaPx.width > 0
-                  ? `${cropAreaPx.width} × ${cropAreaPx.height}px`
-                  : "Free-form"}
-              </div>
-            </div>
-          </div>
-
-          {/* Crop area */}
-          <div className="flex justify-center items-center bg-muted/50 rounded-lg p-4 min-h-[400px] overflow-auto">
-            {imageUrl && (
-              <ReactCrop
-                crop={crop}
-                onChange={(_, percentCrop) => setCrop(percentCrop)}
-                onComplete={(c) => setCompletedCrop(c)}
-                className="max-h-[400px]"
-                style={
-                  {
-                    "--ReactCrop-crop-border": "2px solid hsl(var(--primary))",
-                  } as React.CSSProperties
-                }
+        {/* Toolbar: aspect presets + quick actions */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="inline-flex rounded-lg border border-border bg-muted/40 p-1">
+            {ASPECTS.map((a, i) => (
+              <button
+                key={a.label}
+                type="button"
+                onClick={() => applyAspect(i)}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
+                  i === aspectIndex
+                    ? "bg-background text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  ref={imgRef}
-                  src={imageUrl}
-                  alt="Crop preview"
-                  crossOrigin="anonymous"
-                  onLoad={onImageLoad}
-                  style={{
-                    transform: `scale(${scale})`,
-                    maxHeight: "400px",
-                    width: "auto",
-                  }}
-                />
-              </ReactCrop>
+                {a.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            {!aspect && (
+              <Button type="button" variant="outline" size="sm" onClick={selectAll}>
+                <Maximize2 className="mr-1.5 h-3.5 w-3.5" />
+                Select all
+              </Button>
             )}
+            <Button type="button" variant="outline" size="sm" onClick={resetCrop}>
+              <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+              Reset
+            </Button>
+          </div>
+        </div>
+
+        {imageUrl && (
+          <CropArea
+            src={imageUrl}
+            crop={crop}
+            onChange={setCrop}
+            aspect={aspect}
+            zoom={zoom}
+            crossOrigin="anonymous"
+            onImageLoad={(img) => setNatural({ width: img.naturalWidth, height: img.naturalHeight })}
+          />
+        )}
+
+        {/* Zoom + dimensions */}
+        <div className="grid gap-4 rounded-xl border border-border bg-muted/30 p-4 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Zoom out"
+              onClick={() => setZoom((z) => Math.max(1, +(z - 0.25).toFixed(2)))}
+              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </button>
+            <Slider value={[zoom]} onValueChange={(v) => setZoom(v[0])} min={1} max={3} step={0.05} className="flex-1" />
+            <button
+              type="button"
+              aria-label="Zoom in"
+              onClick={() => setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))}
+              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </button>
+            <span className="w-12 text-right text-sm font-semibold tabular-nums">{zoom.toFixed(1)}×</span>
           </div>
 
-          {/* Controls — matches common ImageCropper layout */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Zoom slider */}
-              <div className="space-y-2">
-                <Label className="text-sm">Zoom</Label>
-                <div className="flex items-center gap-2">
-                  <ZoomOut className="h-4 w-4 text-muted-foreground" />
-                  <Slider
-                    value={[scale]}
-                    onValueChange={(v) => setScale(v[0])}
-                    min={0.5}
-                    max={3}
-                    step={0.1}
-                    className="flex-1"
-                  />
-                  <ZoomIn className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium w-12 text-right">
-                    {scale.toFixed(1)}x
-                  </span>
-                </div>
-              </div>
-
-              {/* Reset button */}
-              <div className="flex items-end gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={resetCrop}
-                  className="flex-1"
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Reset
-                </Button>
+          <div className="flex items-center gap-4 text-xs md:border-l md:border-border md:pl-4">
+            <div>
+              <div className="text-muted-foreground">Original</div>
+              <div className="font-semibold tabular-nums">
+                {natural.width ? `${natural.width} × ${natural.height}` : "—"}
               </div>
             </div>
-
-            {/* Hint */}
-            <div className="flex items-start gap-2 text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-              <span className="text-base">💡</span>
-              <span>
-                Drag inside the image to move the crop area. Drag corners to
-                resize. Use zoom to scale the image. The cropped image will
-                replace the original file.
-              </span>
+            <div>
+              <div className="text-muted-foreground">Output</div>
+              <div className="font-semibold tabular-nums text-primary">
+                {cropPx.width ? `${cropPx.width} × ${cropPx.height}` : "—"}
+              </div>
             </div>
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} isLoading={isSaving}>
+          <Button variant="outline" onClick={onClose} disabled={isSaving || working}>
             Cancel
           </Button>
-          <Button
-            onClick={handleCropAndSave}
-            isLoading={isSaving}
-          >
-            <Crop className="mr-2 h-4 w-4" />
+          <Button onClick={handleCropAndSave} isLoading={isSaving || working} disabled={!natural.width}>
+            {!(isSaving || working) && <Crop className="mr-2 h-4 w-4" />}
             Crop & Save
           </Button>
         </DialogFooter>

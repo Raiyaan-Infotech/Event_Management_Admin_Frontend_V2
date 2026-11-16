@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { Payment, PaymentStats, PaymentStatus } from '@/types';
 
 // ─── API ──────────────────────────────────────────────────────────────────────

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Save, Sparkles, FileText, Settings2, Upload, Crop, Trash2, HelpCircle, RotateCcw, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

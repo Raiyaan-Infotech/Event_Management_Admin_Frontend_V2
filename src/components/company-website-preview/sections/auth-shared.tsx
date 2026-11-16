@@ -22,7 +22,7 @@
  */
 
 import * as React from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Check, ChevronDown, Send, ShieldCheck, ArrowRight, ArrowLeft, X, Lock } from 'lucide-react';
 import { useWebsiteLanguage } from '../website-language-provider';
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export interface BuilderLanguage {
   id: number;

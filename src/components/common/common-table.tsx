@@ -18,6 +18,11 @@ import { PageLoader } from "@/components/common/page-loader";
 import { cn } from "@/lib/utils";
 import { designConfig } from "@/lib/design-config";
 
+const ROW_ACTION =
+  "inline-flex h-7 items-center gap-1 rounded-md border bg-card px-2.5 text-[12.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-40";
+const ROW_ICON_ACTION =
+  "inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-40";
+
 export interface CommonColumn<T> {
   key: string;
   header: string;
@@ -148,7 +153,7 @@ export function CommonTable<
   }, [data, isControlled, sortColumn, sortDirection]);
 
   return (
-    <div className="space-y-4">
+    <div className="ui-table-root space-y-4">
       {/* â”€â”€ Search â”€â”€ */}
       {onSearch && (
         <div className="relative">
@@ -167,7 +172,7 @@ export function CommonTable<
 
       <PageLoader open={isLoading} />
       {!isLoading && (
-        <div className={designConfig.data.tableWrapper}>
+        <div className={cn('ui-table-wrap', designConfig.data.tableWrapper)}>
           <Table>
             {/* â”€â”€ Header â”€â”€ */}
             <TableHeader>
@@ -269,7 +274,7 @@ export function CommonTable<
                     ))}
 
                     {showStatus && (
-                      <TableCell className="px-5 py-4">
+                      <TableCell className="px-4 py-2.5">
                         <Switch
                           pending={Number(row.is_active) === 2 || !!row.has_pending_approval}
                           checked={Number(row.is_active) === 1}
@@ -280,54 +285,55 @@ export function CommonTable<
                     )}
 
                     {showCreated && (
-                      <TableCell className="hidden sm:table-cell px-5 py-4 text-sm tabular-nums text-muted-foreground/70 font-normal tracking-tight">
+                      <TableCell className="hidden sm:table-cell px-4 py-2.5 text-[13px] tabular-nums text-muted-foreground font-normal">
                         {formatDate(row.created_at)}
                       </TableCell>
                     )}
 
                     {showActions && (
-                      <TableCell className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1">
+                      <TableCell className="px-4 py-2.5 text-right">
+                        {/* Row actions — Client Portal style: outlined "Edit" + red-outlined "Delete" */}
+                        <div className="inline-flex items-center justify-end gap-1.5">
                           {extraActions?.filter(a => !(a.hidden?.(row) ?? false)).map((a, i) => {
                             const Icon = a.icon;
                             const isDisabled = a.disabled?.(row) ?? false;
                             return (
-                              <Button
+                              <button
                                 key={i}
-                                variant="ghost"
-                                size="icon"
+                                type="button"
                                 onClick={(e) => { e.stopPropagation(); if (!isDisabled) a.onClick(row); }}
                                 title={a.title}
+                                aria-label={a.title}
                                 disabled={isDisabled}
-                                className={`h-8 w-8 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 active:scale-95 transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none ${a.className || ""}`}
+                                className={cn(ROW_ICON_ACTION, a.className)}
                               >
                                 <Icon className="h-3.5 w-3.5" />
-                              </Button>
+                              </button>
                             );
                           })}
                           {onEdit && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
+                            <button
+                              type="button"
                               onClick={(e) => { e.stopPropagation(); if (!(disableEdit?.(row) ?? false)) onEdit(row); }}
                               title="Edit"
+                              aria-label="Edit"
                               disabled={disableEdit?.(row) ?? false}
-                              className="h-8 w-8 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 active:scale-95 transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none"
+                              className={cn(ROW_ACTION, 'border-border text-foreground hover:bg-muted')}
                             >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
+                              <Pencil className="h-3.5 w-3.5" /> Edit
+                            </button>
                           )}
                           {onDelete && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
+                            <button
+                              type="button"
                               onClick={(e) => { e.stopPropagation(); if (!(disableDelete?.(row) ?? false)) onDelete(row); }}
                               title="Delete"
+                              aria-label="Delete"
                               disabled={disableDelete?.(row) ?? false}
-                              className="h-8 w-8 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none"
+                              className={cn(ROW_ACTION, 'border-destructive/40 text-destructive hover:bg-destructive/5')}
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
+                              <Trash2 className="h-3.5 w-3.5" /> Delete
+                            </button>
                           )}
                         </div>
                       </TableCell>

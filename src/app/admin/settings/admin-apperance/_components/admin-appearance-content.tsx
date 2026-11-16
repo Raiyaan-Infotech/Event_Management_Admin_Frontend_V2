@@ -28,7 +28,7 @@ import {
 import { useSettingsByGroup, useBulkUpdateSettings } from "@/hooks/use-settings";
 import { PermissionGuard } from "@/components/guards/permission-guard";
 import { PageLoader } from '@/components/common/page-loader';
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 const PRESET_PALETTES = [
   {

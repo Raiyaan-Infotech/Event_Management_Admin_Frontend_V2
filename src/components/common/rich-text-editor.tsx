@@ -6,7 +6,7 @@ import 'react-quill-new/dist/quill.snow.css';
 import { ImageIcon, CodeXml, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { apiClient } from "@/lib/api-client";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { MAX_FILE_SIZE } from "@/hooks/use-media";
 
 // Dynamically import ReactQuill to prevent SSR issues
@@ -272,11 +272,16 @@ export const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditor
                     border-radius: 0 0 var(--radius) var(--radius) !important;
                     min-height: 250px;
                     font-size: 14px;
-                    background-color: hsl(var(--background)) !important;
+                    background-color: hsl(var(--card)) !important;
                 }
                 .rich-text-editor-wrapper .ql-editor {
                     min-height: 250px;
                     color: hsl(var(--foreground)) !important;
+                }
+                /* Readable placeholder in light and dark mode */
+                .rich-text-editor-wrapper .ql-editor.ql-blank::before {
+                    color: hsl(var(--muted-foreground)) !important;
+                    font-style: normal !important;
                 }
                 .rich-text-editor-wrapper .ql-snow .ql-stroke {
                     stroke: hsl(var(--foreground)) !important;

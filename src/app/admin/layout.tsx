@@ -6,8 +6,6 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/admin/app-sidebar";
 import AdminNavbar from "@/components/layout/navbar";
 import AdminFooter from "@/components/layout/footer";
-import { TopHeader } from "@/components/layout/top-header";
-import Breadcrumb from "@/components/layout/breadcrumb";
 import { AppearanceProvider } from "@/components/providers/appearance-provider";
 import { DynamicHead } from "@/components/providers/dynamic-head";
 import { CompanyProvider } from "@/contexts/company-context";
@@ -64,16 +62,12 @@ export default function AdminLayout({
 
               {/* Main Content */}
               <SidebarInset className="flex flex-col flex-1 min-w-0">
-                {/* Top Header with Language, Currency, Theme */}
-                <TopHeader />
-
                 {/* Navbar */}
                 <AdminNavbar />
 
                 {/* Main Content Area */}
                 <main className="flex-1 overflow-y-auto overflow-x-hidden">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <Breadcrumb />
+                  <div className="p-3 sm:p-4 md:p-5">
                     {children}
                   </div>
                 </main>

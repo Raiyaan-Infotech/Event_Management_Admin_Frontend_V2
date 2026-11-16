@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, isApprovalRequired } from '@/lib/api-client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export interface Announcement {
     id: number;

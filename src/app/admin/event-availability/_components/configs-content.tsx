@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { DeleteDialog } from "@/components/common/delete-dialog";
 import { useDebounce } from "@/hooks/use-debounce";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import {
     AvailabilityConfig, errorMessage, prettyRange, useAvailabilityConfigs, useConfigStatus, useDeleteConfig,
 } from "@/hooks/use-event-availability";

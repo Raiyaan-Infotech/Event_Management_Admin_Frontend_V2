@@ -118,7 +118,7 @@ export default function Breadcrumb() {
   }
 
   return (
-    <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6 overflow-x-auto whitespace-nowrap scrollbar-none">
+    <nav className="flex items-center gap-2 text-[13px] text-muted-foreground min-w-0 overflow-x-auto whitespace-nowrap scrollbar-none">
       {/* Home Icon */}
       <Link
         href="/admin"

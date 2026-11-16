@@ -1,7 +1,7 @@
 // src/hooks/useVideoTutorials.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */

@@ -92,7 +92,7 @@ export function TooltipContent({ className, side = 'top', align = 'center', side
     return (
         <div
             className={cn(
-                'absolute z-50 overflow-hidden rounded-md border border-border bg-popover px-3 py-1.5 text-xs font-semibold text-popover-foreground shadow-md whitespace-nowrap animate-in fade-in-0 duration-100',
+                'absolute z-50 overflow-hidden rounded-md bg-foreground px-2.5 py-1.5 text-xs font-medium text-background shadow-lg whitespace-nowrap animate-in fade-in-0 zoom-in-95 duration-100',
                 side === 'top' && 'bottom-full mb-1.5 left-1/2 -translate-x-1/2',
                 side === 'bottom' && 'top-full mt-1.5 left-1/2 -translate-x-1/2',
                 side === 'left' && 'right-full mr-1.5 top-1/2 -translate-y-1/2',

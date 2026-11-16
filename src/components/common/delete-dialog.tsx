@@ -6,12 +6,9 @@ import {
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
-import { designConfig } from "@/lib/design-config";
+import { buttonVariants } from "@/components/ui/button";
 
 interface DeleteDialogProps {
     open: boolean;
@@ -23,6 +20,7 @@ interface DeleteDialogProps {
     confirmText?: string;
 }
 
+// Same as the Client Portal's DeletePopup: small centred popup — title, one line, Cancel + red Delete.
 export function DeleteDialog({
     open,
     onOpenChange,
@@ -36,27 +34,25 @@ export function DeleteDialog({
 
     return (
         <AlertDialog open={open} onOpenChange={(val) => !isDeleting && onOpenChange(val)}>
-            <AlertDialogContent className={designConfig.surface.panel}>
-                <AlertDialogHeader>
-                    <AlertDialogTitle className={designConfig.type.cardTitle}>{title || t("common.are_you_sure", "Are you sure?")}</AlertDialogTitle>
-                    <AlertDialogDescription className={designConfig.type.helper}>
-                        {description || t("common.delete_confirm", "This action cannot be undone.")}
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
+            <AlertDialogContent className="max-w-[440px] gap-0 rounded-xl p-5">
+                <AlertDialogTitle className="text-[16px] font-bold leading-tight text-foreground">
+                    {title || t("common.are_you_sure", "Are you sure?")}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
+                    {description || t("common.delete_confirm", "This action cannot be undone.")}
+                </AlertDialogDescription>
+                <div className="mt-5 flex justify-end gap-2">
                     <AlertDialogCancel disabled={isDeleting}>{t("common.cancel", "Cancel")}</AlertDialogCancel>
+                    {/* AlertDialogAction keeps the close-on-confirm behaviour all 54 usages rely on */}
                     <AlertDialogAction
-                        className={cn("inline-flex items-center gap-2", designConfig.feedback.danger)}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            onConfirm();
-                        }}
+                        className={buttonVariants({ variant: "destructive" })}
+                        onClick={onConfirm}
                         disabled={isDeleting}
                     >
-                        {isDeleting && <Loader2 className="animate-spin h-4 w-4" />}
+                        {isDeleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                         {isDeleting ? t("common.deleting", "Deleting...") : (confirmText || t("common.delete", "Delete"))}
                     </AlertDialogAction>
-                </AlertDialogFooter>
+                </div>
             </AlertDialogContent>
         </AlertDialog>
     );

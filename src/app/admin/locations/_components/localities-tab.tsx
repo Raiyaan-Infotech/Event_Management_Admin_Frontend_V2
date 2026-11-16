@@ -61,7 +61,7 @@ import { PageLoader } from '@/components/common/page-loader';
 import { useTranslation } from '@/hooks/use-translation';
 import type { Locality } from '@/types';
 import { isApprovalRequired } from '@/lib/api-client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -35,7 +35,7 @@ import {
   useDeletePushNotificationConfig,
   type PushNotificationConfig,
 } from "@/hooks/use-push-notification-configs";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 function formatTimeAgo(dateString?: string | null): string {
   if (!dateString) return "Never";

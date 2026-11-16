@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { apiClient, isApprovalRequired } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { User, CreateUserDto, UpdateUserDto } from '@/types';
 import type { PaginatedResponse, PaginationParams } from '@/lib/api-client';
 

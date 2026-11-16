@@ -150,7 +150,7 @@ export function PopoverContent({ className, align = 'center', sideOffset = 4, ch
                 zIndex: 1000,
             }}
             className={cn(
-                'w-72 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in fade-in-80 duration-100',
+                'w-72 rounded-xl border border-border bg-popover p-4 text-popover-foreground shadow-[0_12px_32px_-8px_rgba(16,24,40,0.18),0_2px_6px_rgba(16,24,40,0.06)] outline-none animate-in fade-in-0 zoom-in-95 duration-150',
                 className
             )}
             {...props}

@@ -10,7 +10,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { UploadCloud, X, Pipette, Save, Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/common/page-header';
 import { PageLoader } from '@/components/common/page-loader';

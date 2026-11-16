@@ -1,28 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { format, parseISO, setMonth, setYear, getMonth, getYear } from "date-fns";
-import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import { format, isValid, parseISO, startOfDay } from "date-fns";
+import { CalendarIcon, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
 
 interface DatePickerProps {
   label?: string;
+  /** ISO date string `yyyy-MM-dd`. */
   value?: string;
   onChange: (val: string) => void;
   required?: boolean;
@@ -51,165 +39,103 @@ export function DatePicker({
   yearRangeEnd = 10,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const selected = value ? parseISO(value) : undefined;
+  const parsed = value ? parseISO(value) : undefined;
+  const selected = parsed && isValid(parsed) ? parsed : undefined;
 
-  const currentYear = new Date().getFullYear();
-  const startYear = currentYear - yearRangeStart;
-  const endYear = currentYear + yearRangeEnd;
+  const [month, setMonth] = React.useState<Date>(selected ?? new Date());
 
-  const [displayMonth, setDisplayMonth] = React.useState<Date>(
-    selected || new Date()
-  );
-
-  // Sync displayMonth when value changes externally
+  // Jump to the selected month each time the picker opens.
   React.useEffect(() => {
-    if (selected) {
-      setDisplayMonth(selected);
-    }
-  }, [value]);
+    if (open) setMonth(selected ?? new Date());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
-  const years = React.useMemo(() => {
-    const yrs: number[] = [];
-    for (let y = endYear; y >= startYear; y--) {
-      yrs.push(y);
-    }
-    return yrs;
-  }, [startYear, endYear]);
+  // Combine the explicit limits with the allowed year range.
+  const currentYear = new Date().getFullYear();
+  const rangeMin = new Date(currentYear - yearRangeStart, 0, 1);
+  const rangeMax = new Date(currentYear + yearRangeEnd, 11, 31);
+  const effectiveMin = minDate && minDate > rangeMin ? minDate : rangeMin;
+  const effectiveMax = maxDate && maxDate < rangeMax ? maxDate : rangeMax;
 
-  const handleMonthChange = (monthStr: string) => {
-    const newDate = setMonth(displayMonth, parseInt(monthStr));
-    setDisplayMonth(newDate);
-  };
+  const today = startOfDay(new Date());
+  const todayAllowed = today >= startOfDay(effectiveMin) && today <= startOfDay(effectiveMax);
 
-  const handleYearChange = (yearStr: string) => {
-    const newDate = setYear(displayMonth, parseInt(yearStr));
-    setDisplayMonth(newDate);
-  };
-
-  const handleSelect = (date: Date | undefined) => {
+  const commit = (date: Date | undefined) => {
     onChange(date ? format(date, "yyyy-MM-dd") : "");
     setOpen(false);
   };
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
       {label && (
-        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label className="text-[12.5px] font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           {label}
           {required && <span className="text-destructive ml-1">*</span>}
         </label>
       )}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
+          <button
             type="button"
-            variant="outline"
             disabled={disabled}
+            aria-invalid={!!error}
             className={cn(
-              "w-full justify-start text-left font-normal",
-              !value && "text-muted-foreground"
+              "group flex h-9 w-full items-center gap-2 rounded-md border border-input bg-card px-3 text-left text-[13px] transition-colors",
+              "hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              open && "border-primary ring-2 ring-primary/20",
+              error && "border-destructive focus-visible:ring-destructive/40"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {value ? format(parseISO(value), "dd MMM yyyy") : placeholder}
-          </Button>
+            <CalendarIcon className={cn("h-4 w-4 shrink-0", selected ? "text-primary" : "text-muted-foreground")} />
+            <span className={cn("flex-1 truncate", !selected && "text-muted-foreground")}>
+              {selected ? format(selected, "dd MMM yyyy") : placeholder}
+            </span>
+            {selected && !disabled && !required && (
+              <span
+                role="button"
+                tabIndex={-1}
+                aria-label="Clear date"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onChange("");
+                }}
+                className="rounded p-0.5 text-muted-foreground opacity-0 transition hover:bg-muted hover:text-foreground group-hover:opacity-100"
+              >
+                <X className="h-3.5 w-3.5" />
+              </span>
+            )}
+          </button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="p-3 space-y-3">
-            {/* Month & Year Selectors */}
-            <div className="flex items-center gap-2">
-              <Select
-                value={getMonth(displayMonth).toString()}
-                onValueChange={handleMonthChange}
-              >
-                <SelectTrigger className="h-8 flex-1 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {MONTHS.map((month, i) => (
-                    <SelectItem key={month} value={i.toString()}>
-                      {month}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={getYear(displayMonth).toString()}
-                onValueChange={handleYearChange}
-              >
-                <SelectTrigger className="h-8 w-[90px] text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="max-h-[200px]">
-                  {years.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Calendar */}
-            <DayPicker
-              mode="single"
-              selected={selected}
-              onSelect={handleSelect}
-              month={displayMonth}
-              onMonthChange={setDisplayMonth}
-              disabled={(date) => {
-                if (minDate && date < minDate) return true;
-                if (maxDate && date > maxDate) return true;
-                return false;
-              }}
-              showOutsideDays
-              className="!p-0"
-              classNames={{
-                months: "flex flex-col",
-                month: "space-y-2",
-                nav: "flex items-center justify-between",
-                button_previous: cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "h-7 w-7 p-0"
-                ),
-                button_next: cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "h-7 w-7 p-0"
-                ),
-                month_caption: "hidden",
-                table: "w-full border-collapse",
-                weekdays: "flex",
-                weekday:
-                  "text-muted-foreground w-8 font-normal text-[0.8rem] text-center",
-                week: "flex w-full mt-1",
-                day: "h-8 w-8 p-0 text-center text-sm relative",
-                day_button: cn(
-                  "h-8 w-8 p-0 font-normal inline-flex items-center justify-center rounded-md text-sm",
-                  "hover:bg-accent hover:text-accent-foreground",
-                  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                  "aria-selected:opacity-100"
-                ),
-                selected:
-                  "[&_button]:bg-primary [&_button]:text-primary-foreground [&_button]:hover:bg-primary [&_button]:hover:text-primary-foreground",
-                today: "[&_button]:bg-accent [&_button]:text-accent-foreground",
-                outside: "text-muted-foreground opacity-50",
-                disabled: "text-muted-foreground opacity-50",
-                hidden: "invisible",
-              }}
-              components={{
-                Chevron: ({ orientation }) =>
-                  orientation === "left" ? (
-                    <ChevronLeft className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  ),
-              }}
-            />
+        <PopoverContent className="w-auto overflow-hidden rounded-xl p-0 shadow-xl" align="start">
+          <Calendar
+            selected={selected}
+            onSelect={commit}
+            month={month}
+            onMonthChange={setMonth}
+            minDate={effectiveMin}
+            maxDate={effectiveMax}
+          />
+          <div className="flex items-center justify-between border-t border-border bg-muted/30 px-3 py-2">
+            <button
+              type="button"
+              onClick={() => commit(undefined)}
+              className="rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              disabled={!todayAllowed}
+              onClick={() => commit(today)}
+              className="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/15 disabled:pointer-events-none disabled:opacity-40"
+            >
+              Today
+            </button>
           </div>
         </PopoverContent>
       </Popover>
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

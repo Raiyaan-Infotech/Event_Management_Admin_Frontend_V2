@@ -598,33 +598,33 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar>
-        <SidebarHeader>
+        <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-3 py-0">
           <SidebarMenu>
             <SidebarMenuItem>
               <Link
                 href="/admin"
-                className="flex flex-col items-center gap-2 px-2 py-4"
+                className="flex min-w-0 items-center gap-2.5"
               >
                 {adminLogoUrl ? (
                   <>
                     <img
                       src={adminLogoUrl}
                       alt={adminTitle}
-                      style={{ height: `${logoHeight}px` }}
-                      className="max-w-full object-contain"
+                      style={{ height: `${Math.min(Number(logoHeight) || 32, 36)}px` }}
+                      className="max-w-[120px] shrink-0 object-contain"
                     />
-                    <span className="font-semibold text-lg text-center">
+                    <span className="truncate text-[15px] font-bold leading-tight">
                       {adminTitle}
                     </span>
                   </>
                 ) : (
                   <>
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
                       <span className="text-primary-foreground font-bold">
                         {adminTitle.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    <span className="font-semibold text-lg text-center">
+                    <span className="truncate text-[15px] font-bold leading-tight">
                       {adminTitle}
                     </span>
                   </>
@@ -636,7 +636,7 @@ export function AppSidebar() {
 
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>{t("nav.navigation")}</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{t("nav.navigation")}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {visibleMenuItems.map((item) => {

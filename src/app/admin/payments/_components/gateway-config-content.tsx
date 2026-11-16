@@ -20,7 +20,7 @@ import { PageLoader } from "@/components/common/page-loader";
 import { PermissionGuard } from "@/components/guards/permission-guard";
 import { useSettingsByGroup, useBulkUpdateSettings } from "@/hooks/use-settings";
 import { GATEWAYS, type GatewayDef } from "../_components/payments-content";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 // ─── Gateway field definitions ────────────────────────────────────────────────
 

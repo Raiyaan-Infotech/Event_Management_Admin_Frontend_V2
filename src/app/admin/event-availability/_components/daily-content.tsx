@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
-    CalendarCheck, CalendarClock, CalendarDays, CalendarX2, Eye, ListChecks, Loader2, MoreHorizontal, Pencil,
-    PauseCircle, PlayCircle, Plus, PlusCircle, RotateCcw, Search, Settings2, Trash2, XCircle,
+    CalendarCheck, CalendarDays, ChevronLeft, ChevronRight, CircleCheck, Eye, Layers, Loader2, MoreHorizontal, Pencil,
+    PauseCircle, PlayCircle, Plus, PlusCircle, RotateCcw, Search, Trash2, Users, XCircle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { PageLoader } from "@/components/common/page-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +16,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { DeleteDialog } from "@/components/common/delete-dialog";
 import { useDebounce } from "@/hooks/use-debounce";
 import { DayRow, errorMessage, prettyDate, prettyDateTime, useAvailabilityDaily, useDayAction } from "@/hooks/use-event-availability";
-import { toast } from "sonner";
-import { CategorySelect, DayStatusBadge, SectionCard, StatCard, ModuleHeader } from "./shared";
+import { toast } from "@/lib/toast";
+import { CategorySelect, DayStatusBadge } from "./shared";
 import { DaySheet, SheetMode } from "./day-sheets";
 
 const monthRange = () => {
@@ -30,6 +31,26 @@ const monthRange = () => {
 
 const STATUS_LABEL: Record<string, string> = { all: "All Statuses", available: "Available", low: "Low Availability", full: "Fully Booked", disabled: "Disabled" };
 
+/** Stat card from the design layout: tinted icon tile + label + large number (theme colour, green for Available). */
+function StatTile({ icon, label, value, tone = "primary" }: { icon: React.ReactNode; label: string; value?: number; tone?: "primary" | "green" }) {
+    return (
+        <div className="flex items-center gap-4 rounded-xl border bg-card px-5 py-4 shadow-sm">
+            <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl [&_svg]:h-6 [&_svg]:w-6",
+                tone === "green" ? "bg-emerald-50 text-emerald-600" : "bg-primary/10 text-primary")}>{icon}</div>
+            <div>
+                <p className="text-[13px] text-muted-foreground">{label}</p>
+                <p className="text-2xl font-bold leading-tight text-foreground">{value ?? "—"}</p>
+            </div>
+        </div>
+    );
+}
+
+/** Up to 5 page numbers around the current page. */
+const pageWindow = (page: number, total: number) => {
+    const start = Math.max(1, Math.min(page - 2, total - 4));
+    return Array.from({ length: Math.min(5, total) }, (_, i) => start + i);
+};
+
 export function DailyContent() {
     const initial = useMemo(monthRange, []);
     const [from, setFrom] = useState(initial.from);
@@ -40,7 +61,7 @@ export function DailyContent() {
     const [page, setPage] = useState(1);
     const q = useDebounce(search, 400);
 
-    const params = { from, to, event_category_id: category === "all" ? undefined : category, status: status === "all" ? undefined : status, search: q || undefined, page, limit: 15 };
+    const params = { from, to, event_category_id: category === "all" ? undefined : category, status: status === "all" ? undefined : status, search: q || undefined, page, limit: 8 };
     const { data, isLoading, isFetching, error } = useAvailabilityDaily(params);
     const rows = data?.data ?? [];
     const stats = data?.stats;
@@ -56,63 +77,74 @@ export function DailyContent() {
     return (
         <div className="space-y-4 [&_input]:text-[13px] [&_textarea]:text-[13px] [&_button[role=combobox]]:text-[13px]">
             <PageLoader open={action.isPending} text={toDelete ? "Deleting..." : "Saving..."} />
-            <ModuleHeader
-                title="Daily Event Booking Availability"
-                description="Manage configured daily event booking limits, booked counts and balance status."
-                action={
-                    <div className="flex flex-nowrap gap-2">
-                        <Button variant="outline" asChild><Link href="/admin/event-availability/overrides"><CalendarClock />Special Limits Override</Link></Button>
-                        <Button variant="outline" asChild><Link href="/admin/event-availability/configs"><Settings2 />Configs</Link></Button>
-                        <Button asChild><Link href="/admin/event-availability/create"><Plus />Create Config</Link></Button>
-                    </div>
-                }
-            />
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard icon={<CalendarDays />} label="Total Configured Dates" value={stats?.configured ?? "—"} />
-                <StatCard icon={<CalendarCheck />} label="Available Dates" value={stats?.available ?? "—"} tone="green" />
-                <StatCard icon={<CalendarX2 />} label="Fully Booked Dates" value={stats?.fully_booked ?? "—"} tone="red" />
-                <StatCard icon={<PauseCircle />} label="Disabled Dates" value={stats?.disabled ?? "—"} tone="muted" />
+            {/* Header — Jamal's design (Daily Event Booking Availability, 2026-11-16): title only; Create Config sits in the filter row. */}
+            <div>
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Daily Event Booking Availability</h1>
+                <p className="text-sm text-muted-foreground">Manage configured daily event booking limits, booked counts and balance status.</p>
             </div>
 
-            <SectionCard icon={<ListChecks />} title="Filter">
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_1.3fr_auto] xl:items-end">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <StatTile icon={<CalendarDays />} label="Configured Dates" value={stats?.configured} />
+                <StatTile icon={<CircleCheck />} label="Fully Booked" value={stats?.fully_booked} />
+                <StatTile icon={<CalendarCheck />} label="Available Dates" value={stats?.available} tone="green" />
+                <StatTile icon={<Layers />} label="Total Bookings" value={stats?.total_booked} />
+            </div>
+
+            {/* One filter row: Date Range · Event Category · Applies To · Status · Search · Reset · Create Config */}
+            <section className="rounded-xl border bg-card p-4 shadow-sm">
+                <div className="flex flex-wrap items-end gap-3 xl:flex-nowrap">
                     <div>
-                        <p className="mb-1 text-[13px] font-medium">From</p>
-                        <div className="[&_button]:w-full [&>div]:w-full [&_.inline-block]:!block [&_.inline-block]:w-full"><DatePicker value={from} onChange={(v) => { setFrom(v); setPage(1); }} /></div>
+                        <p className="mb-1 text-[12.5px] font-medium text-muted-foreground">Date Range</p>
+                        <div className="flex items-center gap-2">
+                            <div className="w-[152px] [&_button]:w-full [&_button]:px-2.5 [&_button]:text-[12.5px] [&>div]:w-full"><DatePicker value={from} onChange={(v) => { setFrom(v); setPage(1); }} /></div>
+                            <span className="text-muted-foreground">–</span>
+                            <div className="w-[152px] [&_button]:w-full [&_button]:px-2.5 [&_button]:text-[12.5px] [&>div]:w-full"><DatePicker value={to} onChange={(v) => { setTo(v); setPage(1); }} /></div>
+                        </div>
                     </div>
-                    <div>
-                        <p className="mb-1 text-[13px] font-medium">To</p>
-                        <div className="[&_button]:w-full [&>div]:w-full [&_.inline-block]:!block [&_.inline-block]:w-full"><DatePicker value={to} onChange={(v) => { setTo(v); setPage(1); }} /></div>
-                    </div>
-                    <div>
-                        <p className="mb-1 text-[13px] font-medium">Category</p>
+                    <div className="w-[150px] shrink-0">
+                        <p className="mb-1 text-[12.5px] font-medium text-muted-foreground">Event Category</p>
                         <CategorySelect value={category} onChange={(v) => { setCategory(v); setPage(1); }} />
                     </div>
-                    <div>
-                        <p className="mb-1 text-[13px] font-medium">Status</p>
+                    <div className="w-[152px] shrink-0">
+                        <p className="mb-1 text-[12.5px] font-medium text-muted-foreground">Applies To</p>
+                        {/* The daily limit is shared by every organizer, so this is the only scope there is. */}
+                        <Select value="all" onValueChange={() => {}}>
+                            <SelectTrigger className="h-9"><span className="flex items-center gap-2 whitespace-nowrap"><Users className="h-4 w-4 text-muted-foreground" />All Organizers</span></SelectTrigger>
+                            <SelectContent><SelectItem value="all">All Organizers</SelectItem></SelectContent>
+                        </Select>
+                    </div>
+                    <div className="w-[152px] shrink-0">
+                        <p className="mb-1 text-[12.5px] font-medium text-muted-foreground">Status</p>
                         <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-                            <SelectTrigger className="h-9"><SelectValue>{STATUS_LABEL[status]}</SelectValue></SelectTrigger>
+                            <SelectTrigger className="h-9 justify-start gap-2"><CircleCheck className="h-4 w-4 shrink-0 text-muted-foreground" /><span className="flex-1 truncate text-left">{STATUS_LABEL[status]}</span></SelectTrigger>
                             <SelectContent>
                                 {Object.entries(STATUS_LABEL).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="relative">
+                    <div className="relative min-w-[110px] flex-1">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input className="h-9 pl-9" placeholder="Search..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+                        <Input className="h-9 pl-9" placeholder="Search by date, category..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
                     </div>
-                    <Button variant="outline" className="h-9" onClick={reset}><RotateCcw />Reset</Button>
+                    <Button variant="outline" className="h-9 shrink-0" onClick={reset}><RotateCcw />Reset</Button>
+                    <Button asChild className="h-9 shrink-0"><Link href="/admin/event-availability/create"><Plus />Create Config</Link></Button>
                 </div>
-            </SectionCard>
+            </section>
 
-            <SectionCard icon={<CalendarDays />} title="Booked Dates List" action={isFetching && !isLoading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}>
-                <div className="overflow-x-auto rounded-lg border">
+            <section className="rounded-xl border bg-card p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary [&_svg]:h-4 [&_svg]:w-4"><CalendarDays /></span>
+                        <h2 className="text-[16px] font-bold text-foreground">Booked Dates List</h2>
+                    </div>
+                    {isFetching && !isLoading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
+                </div>
+                <div className="overflow-x-auto">
                     <table className="w-full text-[13px]">
-                        <thead className="bg-muted/40 text-left text-xs font-semibold text-muted-foreground">
+                        <thead className="bg-muted/50 text-left text-[12.5px] font-semibold text-foreground/80 [&_th:first-child]:rounded-l-lg [&_th:last-child]:rounded-r-lg">
                             <tr>
-                                {["Date", "Day", "Category", "Daily Max Events", "Created Events", "Balance Slots", "Status", "Last Updated", ""].map((h) => (
-                                    <th key={h} className="whitespace-nowrap px-3 py-2.5">{h}</th>
+                                {["Date", "Day", "Category", "Daily Max Events", "Created Events", "Balance Slots", "Status", "Last Updated", "Actions"].map((h, i) => (
+                                    <th key={h} className={cn("whitespace-nowrap px-3 py-2.5", i >= 3 && i <= 5 && "text-center", i === 8 && "text-right")}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
@@ -126,7 +158,7 @@ export function DailyContent() {
                                     No configured dates in this range. <Link href="/admin/event-availability/create" className="font-medium text-primary hover:underline">Create a config</Link> to open dates for booking.
                                 </td></tr>
                             ) : rows.map((r) => (
-                                <tr key={`${r.config_id}-${r.date}`} className="border-t hover:bg-muted/20">
+                                <tr key={`${r.config_id}-${r.date}`} className="border-b last:border-b-0 hover:bg-muted/20">
                                     <td className="whitespace-nowrap px-3 py-2 font-medium"><span className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4 text-muted-foreground" />{prettyDate(r.date)}</span></td>
                                     <td className="px-3 py-2">{r.day}</td>
                                     <td className="px-3 py-2">{r.category_name}</td>
@@ -167,14 +199,18 @@ export function DailyContent() {
                 {data && data.pagination.total > 0 && (
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
                         <span>Showing {(page - 1) * data.pagination.limit + 1} – {Math.min(page * data.pagination.limit, data.pagination.total)} of {data.pagination.total} dates</span>
-                        <div className="flex gap-2">
-                            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>Previous</Button>
-                            <span className="flex items-center px-2">Page {page} of {data.pagination.totalPages}</span>
-                            <Button variant="outline" size="sm" disabled={page >= data.pagination.totalPages} onClick={() => setPage(page + 1)}>Next</Button>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" className="h-9 w-9" aria-label="Previous page" disabled={page <= 1} onClick={() => setPage(page - 1)}><ChevronLeft /></Button>
+                            {pageWindow(page, data.pagination.totalPages).map((n) => (
+                                <Button key={n} variant="outline" size="icon" aria-label={`Page ${n}`} aria-current={n === page ? "page" : undefined}
+                                    className={cn("h-9 w-9 text-[13px]", n === page && "border-primary bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground")}
+                                    onClick={() => setPage(n)}>{n}</Button>
+                            ))}
+                            <Button variant="outline" size="icon" className="h-9 w-9" aria-label="Next page" disabled={page >= data.pagination.totalPages} onClick={() => setPage(page + 1)}><ChevronRight /></Button>
                         </div>
                     </div>
                 )}
-            </SectionCard>
+            </section>
 
             <DaySheet row={sheet?.row ?? null} mode={sheet?.mode ?? null} onClose={() => setSheet(null)} onMode={(m) => sheet && setSheet({ ...sheet, mode: m })} />
 

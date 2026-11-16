@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, isApprovalRequired } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { Country, State, City, Pincode, Locality } from '@/types';
 
 // Re-export Locality as CityRecord so the rest of the app keeps compiling

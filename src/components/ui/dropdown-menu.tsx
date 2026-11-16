@@ -213,7 +213,7 @@ export function DropdownMenuContent({ className, align = 'end', sideOffset = 4, 
                 visibility: size ? 'visible' : 'hidden',
             }}
             className={cn(
-                'min-w-[8rem] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 duration-100',
+                'min-w-[10rem] rounded-xl border border-border bg-popover p-1 text-popover-foreground shadow-[0_12px_32px_-8px_rgba(16,24,40,0.18),0_2px_6px_rgba(16,24,40,0.06)] animate-in fade-in-0 zoom-in-95 duration-150',
                 className
             )}
             {...props}
@@ -249,7 +249,7 @@ export const DropdownMenuItem = React.forwardRef<HTMLButtonElement, DropdownMenu
                     handleClick(e);
                 },
                 className: cn(
-                    'relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none transition-colors hover:bg-accent hover:text-accent-foreground font-medium disabled:pointer-events-none disabled:opacity-50',
+                    'relative flex w-full cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-none transition-colors hover:bg-muted focus-visible:bg-muted disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
                     inset && 'pl-8',
                     className,
                     child.props.className
@@ -262,7 +262,7 @@ export const DropdownMenuItem = React.forwardRef<HTMLButtonElement, DropdownMenu
                 ref={ref}
                 type="button"
                 className={cn(
-                    'relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none transition-colors hover:bg-accent hover:text-accent-foreground font-medium disabled:pointer-events-none disabled:opacity-50',
+                    'relative flex w-full cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-none transition-colors hover:bg-muted focus-visible:bg-muted disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
                     inset && 'pl-8',
                     className
                 )}
@@ -281,7 +281,7 @@ export function DropdownMenuSubTrigger({ className, inset, children, asChild, ..
         <button
             type="button"
             className={cn(
-                'flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent',
+                'flex w-full cursor-default select-none items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-none hover:bg-muted',
                 inset && 'pl-8',
                 className
             )}
@@ -294,7 +294,7 @@ export function DropdownMenuSubTrigger({ className, inset, children, asChild, ..
 }
 
 export function DropdownMenuSubContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-    return <div className={cn('p-1 border border-border bg-popover rounded-md shadow-md', className)} {...props} />;
+    return <div className={cn('p-1 border border-border bg-popover rounded-xl shadow-[0_12px_32px_-8px_rgba(16,24,40,0.18),0_2px_6px_rgba(16,24,40,0.06)]', className)} {...props} />;
 }
 
 export function DropdownMenuCheckboxItem({
@@ -311,7 +311,7 @@ export function DropdownMenuCheckboxItem({
         <button
             type="button"
             className={cn(
-                'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-xs outline-none transition-colors hover:bg-accent hover:text-accent-foreground font-medium',
+                'relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-8 pr-2.5 text-sm outline-none transition-colors hover:bg-muted',
                 className
             )}
             onClick={(e) => {
@@ -335,7 +335,7 @@ export function DropdownMenuRadioItem({ className, children, asChild, ...props }
         <button
             type="button"
             className={cn(
-                'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-xs outline-none transition-colors hover:bg-accent hover:text-accent-foreground font-medium',
+                'relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-8 pr-2.5 text-sm outline-none transition-colors hover:bg-muted',
                 className
             )}
             onClick={(e) => {
@@ -353,11 +353,11 @@ export function DropdownMenuRadioItem({ className, children, asChild, ...props }
 }
 
 export function DropdownMenuLabel({ className, inset, ...props }: React.HTMLAttributes<HTMLDivElement> & { inset?: boolean }) {
-    return <div className={cn('px-2 py-1.5 text-xs font-semibold text-foreground', inset && 'pl-8', className)} {...props} />;
+    return <div className={cn('px-2.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground', inset && 'pl-8', className)} {...props} />;
 }
 
 export function DropdownMenuSeparator({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-    return <div className={cn('-mx-1 my-1 h-px bg-muted', className)} {...props} />;
+    return <div className={cn('-mx-1 my-1 h-px bg-border', className)} {...props} />;
 }
 
 export function DropdownMenuShortcut({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {

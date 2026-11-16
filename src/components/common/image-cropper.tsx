@@ -1,13 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
 import { Upload, X, Crop, RotateCcw, ZoomIn, ZoomOut, Images } from "lucide-react";
-import ReactCrop, {
-  centerCrop,
-  makeAspectCrop,
-  type PercentCrop,
-  type PixelCrop,
-} from "react-image-crop";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,11 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { CropArea, centerAspectCrop, getCroppedFile, type PercentCrop } from "@/components/ui/crop-area";
 import { MediaPickerModal } from "@/components/common/media-picker-modal";
-import { toast } from "sonner";
-import "react-image-crop/dist/ReactCrop.css";
+import { toast } from "@/lib/toast";
 
 interface ImageCropperProps {
   title: string;
@@ -43,6 +36,8 @@ interface ImageCropperProps {
   showMediaPicker?: boolean;
 }
 
+const MAX_FILE_SIZE_MB = 10;
+
 export function ImageCropper({
   title,
   description,
@@ -62,13 +57,10 @@ export function ImageCropper({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imgSrc, setImgSrc] = useState("");
   const [crop, setCrop] = useState<PercentCrop>();
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [scale, setScale] = useState(1);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
   const [localPreview, setLocalPreview] = useState<string>("");
-
-  const imgRef = useRef<HTMLImageElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isCropping, setIsCropping] = useState(false);
 
   const aspect = targetWidth / targetHeight;
 
@@ -77,137 +69,46 @@ export function ImageCropper({
     onRemove();
   };
 
-  const MAX_FILE_SIZE_MB = 10;
-
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    const file = e.target.files?.[0];
+    // Clear so picking the same file again still fires onChange.
+    e.target.value = "";
+    if (!file) return;
 
-      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-        toast.error(`File size exceeds the ${MAX_FILE_SIZE_MB}MB limit. Please choose a smaller file.`);
-        e.target.value = "";
-        return;
-      }
-
-      if (skipCrop) {
-        onImageCropped(file);
-        return;
-      }
-
-      setSelectedFile(file);
-      setCrop(undefined);
-      setCompletedCrop(null);
-      setScale(1);
-
-      const reader = new FileReader();
-      reader.addEventListener("load", () => {
-        setImgSrc(reader.result?.toString() || "");
-        setShowCropDialog(true);
-      });
-      reader.readAsDataURL(file);
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      toast.error(`File size exceeds the ${MAX_FILE_SIZE_MB}MB limit. Please choose a smaller file.`);
+      return;
     }
+
+    if (skipCrop) {
+      onImageCropped(file);
+      return;
+    }
+
+    setSelectedFile(file);
+    setCrop(undefined);
+    setScale(1);
+
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      setImgSrc(reader.result?.toString() || "");
+      setShowCropDialog(true);
+    });
+    reader.readAsDataURL(file);
   };
 
-  const calculateExactCrop = useCallback(
-    (imgWidth: number, imgHeight: number, naturalWidth: number): PercentCrop => {
-      const targetPercentWidth = Math.min(100, (targetWidth / naturalWidth) * 100);
-      return centerCrop(
-        makeAspectCrop(
-          { unit: "%", width: targetPercentWidth },
-          aspect,
-          imgWidth,
-          imgHeight
-        ),
-        imgWidth,
-        imgHeight
-      );
-    },
-    [targetWidth, aspect]
-  );
+  /** Start with a box matching the target size (or as large as the image allows). */
+  const initialCrop = (naturalWidth: number, naturalHeight: number) =>
+    centerAspectCrop(naturalWidth, naturalHeight, aspect, Math.min(100, (targetWidth / naturalWidth) * 100));
 
-  const onImageLoad = useCallback(
-    (e: React.SyntheticEvent<HTMLImageElement>) => {
-      const { width, height, naturalWidth } = e.currentTarget;
-      setImageDimensions({ width: naturalWidth, height: e.currentTarget.naturalHeight });
-      setCrop(calculateExactCrop(width, height, naturalWidth));
-    },
-    [calculateExactCrop]
-  );
-
-  const handleScaleChange = (value: number[]) => {
-    setScale(value[0]);
+  const onImageLoad = (img: HTMLImageElement) => {
+    setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+    setCrop(initialCrop(img.naturalWidth, img.naturalHeight));
   };
 
   const resetCrop = () => {
-    if (imgRef.current) {
-      const { width, height, naturalWidth } = imgRef.current;
-      setCrop(calculateExactCrop(width, height, naturalWidth));
-      setScale(1);
-    }
-  };
-
-  const getCroppedImage = useCallback(async (): Promise<File | null> => {
-    if (!imgRef.current || !completedCrop || !canvasRef.current || !imgSrc) {
-      return null;
-    }
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-
-    // Load a fresh off-DOM image from imgSrc instead of using imgRef.current.
-    // The DOM element can carry cross-origin taint even after its src changes,
-    // but a new Image() loaded from a data URL is always origin-clean.
-    const offscreenImg = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = imgSrc;
-    });
-
-    // Read display dimensions from the ref (just numbers — does not taint).
-    const displayWidth = imgRef.current.width;
-    const displayHeight = imgRef.current.height;
-
-    const scaleX = offscreenImg.naturalWidth / displayWidth;
-    const scaleY = offscreenImg.naturalHeight / displayHeight;
-
-    const sourceX = completedCrop.x * scaleX;
-    const sourceY = completedCrop.y * scaleY;
-    const sourceWidth = completedCrop.width * scaleX;
-    const sourceHeight = completedCrop.height * scaleY;
-
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    ctx.imageSmoothingQuality = "high";
-
-    ctx.drawImage(offscreenImg, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetWidth, targetHeight);
-
-    const mimeType = selectedFile?.type || "image/jpeg";
-    const fileName = selectedFile?.name || "image.jpg";
-    return new Promise((resolve) => {
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            resolve(new File([blob], fileName, { type: mimeType, lastModified: Date.now() }));
-          } else {
-            resolve(null);
-          }
-        },
-        mimeType,
-        0.95
-      );
-    });
-  }, [completedCrop, selectedFile, targetWidth, targetHeight, imgSrc]);
-
-  const handleCrop = async () => {
-    const croppedFile = await getCroppedImage();
-    if (croppedFile) {
-      const blobUrl = URL.createObjectURL(croppedFile);
-      setLocalPreview(blobUrl);
-      onImageCropped(croppedFile);
-      handleClose();
-    }
+    if (imageDimensions.width) setCrop(initialCrop(imageDimensions.width, imageDimensions.height));
+    setScale(1);
   };
 
   const handleClose = () => {
@@ -215,15 +116,35 @@ export function ImageCropper({
     setSelectedFile(null);
     setImgSrc("");
     setCrop(undefined);
-    setCompletedCrop(null);
     setScale(1);
+  };
+
+  const handleCrop = async () => {
+    if (!crop || !imgSrc) return;
+    setIsCropping(true);
+    try {
+      const croppedFile = await getCroppedFile(imgSrc, crop, {
+        fileName: selectedFile?.name || "image.jpg",
+        mimeType: selectedFile?.type || "image/jpeg",
+        quality: 0.95,
+        output: { width: targetWidth, height: targetHeight },
+      });
+      if (croppedFile) {
+        setLocalPreview(URL.createObjectURL(croppedFile));
+        onImageCropped(croppedFile);
+        handleClose();
+      }
+    } catch {
+      toast.error("Could not crop this image. Please try another one.");
+    } finally {
+      setIsCropping(false);
+    }
   };
 
   const handleMediaSelect = async (url: string) => {
     setMediaPickerOpen(false);
     setSelectedFile(null);
     setCrop(undefined);
-    setCompletedCrop(null);
     setScale(1);
 
     // Use /api/proxy-image which server-side fetches the image and returns it
@@ -247,10 +168,10 @@ export function ImageCropper({
 
   const displayImage = localPreview || currentImage;
 
-  const cropAreaPx = completedCrop && imgRef.current
+  const cropAreaPx = crop
     ? {
-      width: Math.round(completedCrop.width * (imgRef.current.naturalWidth / imgRef.current.width)),
-      height: Math.round(completedCrop.height * (imgRef.current.naturalHeight / imgRef.current.height)),
+      width: Math.round((crop.width / 100) * imageDimensions.width),
+      height: Math.round((crop.height / 100) * imageDimensions.height),
     }
     : { width: 0, height: 0 };
 
@@ -330,87 +251,88 @@ export function ImageCropper({
         </div>
       </div>
 
-      {/* Crop Dialog — triggered by Upload button */}
-      <Dialog open={showCropDialog} onOpenChange={setShowCropDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      {/* Crop Dialog */}
+      <Dialog open={showCropDialog} onOpenChange={(o) => !o && handleClose()}>
+        <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto gap-5">
           <DialogHeader>
-            <DialogTitle>Crop Image</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Crop className="h-4 w-4" />
+              </span>
+              Crop Image
+            </DialogTitle>
             <DialogDescription>
-              Adjust the crop area to {targetWidth}×{targetHeight}px. Drag the corners to resize.
+              Drag the box to move it and the corners to resize. The image is saved at exactly {targetWidth}×{targetHeight}px.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-2 text-sm bg-muted/50 rounded-lg p-3">
-              <div className="text-center">
-                <div className="text-muted-foreground text-xs mb-1">Original</div>
-                <div className="font-semibold">{imageDimensions.width} × {imageDimensions.height}px</div>
-              </div>
-              <div className="text-center border-x">
-                <div className="text-muted-foreground text-xs mb-1">Crop Area</div>
-                <div className="font-semibold text-primary">{cropAreaPx.width} × {cropAreaPx.height}px</div>
-              </div>
-              <div className="text-center">
-                <div className="text-muted-foreground text-xs mb-1">Output</div>
-                <div className="font-semibold text-green-600">{targetWidth} × {targetHeight}px</div>
-              </div>
+          {imgSrc && (
+            <CropArea
+              src={imgSrc}
+              crop={crop}
+              onChange={setCrop}
+              aspect={aspect}
+              zoom={scale}
+              onImageLoad={onImageLoad}
+            />
+          )}
+
+          <div className="grid gap-4 rounded-xl border border-border bg-muted/30 p-4 md:grid-cols-[1fr_auto] md:items-center">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                aria-label="Zoom out"
+                onClick={() => setScale((z) => Math.max(1, +(z - 0.25).toFixed(2)))}
+                className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </button>
+              <Slider value={[scale]} onValueChange={(v) => setScale(v[0])} min={1} max={3} step={0.05} className="flex-1" />
+              <button
+                type="button"
+                aria-label="Zoom in"
+                onClick={() => setScale((z) => Math.min(3, +(z + 0.25).toFixed(2)))}
+                className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </button>
+              <span className="w-12 text-right text-sm font-semibold tabular-nums">{scale.toFixed(1)}×</span>
+              <Button type="button" variant="outline" size="sm" onClick={resetCrop} className="ml-1">
+                <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                Reset
+              </Button>
             </div>
 
-            <div className="flex justify-center items-center bg-muted/50 rounded-lg p-4 min-h-[400px]">
-              {imgSrc && (
-                <ReactCrop
-                  crop={crop}
-                  onChange={(_, percentCrop) => setCrop(percentCrop)}
-                  onComplete={(c) => setCompletedCrop(c)}
-                  aspect={aspect}
-                  locked={true}
-                  className="max-h-[400px]"
-                  style={{ "--ReactCrop-crop-border": "2px solid hsl(var(--primary))" } as React.CSSProperties}
-                >
-                  <img
-                    ref={imgRef}
-                    alt="Crop"
-                    src={imgSrc}
-                    style={{ transform: `scale(${scale})` }}
-                    onLoad={onImageLoad}
-                    className="max-h-[400px] w-auto"
-                  />
-                </ReactCrop>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm">Zoom</Label>
-                  <div className="flex items-center gap-2">
-                    <ZoomOut className="h-4 w-4 text-muted-foreground" />
-                    <Slider value={[scale]} onValueChange={handleScaleChange} min={0.5} max={3} step={0.1} className="flex-1" />
-                    <ZoomIn className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium w-12 text-right">{scale.toFixed(1)}x</span>
-                  </div>
-                </div>
-                <div className="flex items-end gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={resetCrop} className="flex-1">
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    Reset
-                  </Button>
+            <div className="flex items-center gap-4 text-xs md:border-l md:border-border md:pl-4">
+              <div>
+                <div className="text-muted-foreground">Original</div>
+                <div className="font-semibold tabular-nums">
+                  {imageDimensions.width ? `${imageDimensions.width} × ${imageDimensions.height}` : "—"}
                 </div>
               </div>
-
-              <div className="flex items-start gap-2 text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                <span className="text-base">💡</span>
-                <span>Drag the corners to resize the crop area. Drag inside to move it. Use zoom to scale the image.</span>
+              <div>
+                <div className="text-muted-foreground">Selected</div>
+                <div className="font-semibold tabular-nums">
+                  {cropAreaPx.width ? `${cropAreaPx.width} × ${cropAreaPx.height}` : "—"}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">Output</div>
+                <div className="font-semibold tabular-nums text-primary">{targetWidth} × {targetHeight}</div>
               </div>
             </div>
-
-            <canvas ref={canvasRef} className="hidden" />
           </div>
 
+          {cropAreaPx.width > 0 && cropAreaPx.width < targetWidth && (
+            <p className="-mt-2 text-xs text-amber-600 dark:text-amber-400">
+              The selected area is smaller than {targetWidth}px wide, so the image will be scaled up and may look soft.
+            </p>
+          )}
+
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
-            <Button type="button" onClick={handleCrop} disabled={!completedCrop}>
-              <Crop className="mr-2 h-4 w-4" />
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isCropping}>Cancel</Button>
+            <Button type="button" onClick={handleCrop} disabled={!crop} isLoading={isCropping}>
+              {!isCropping && <Crop className="mr-2 h-4 w-4" />}
               Crop & Save
             </Button>
           </DialogFooter>

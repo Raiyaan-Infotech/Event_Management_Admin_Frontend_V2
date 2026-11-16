@@ -19,7 +19,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DeleteDialog } from "@/components/common/delete-dialog";
 import { useDebounce } from "@/hooks/use-debounce";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import {
     AvailabilityOverride, BlockingDate, OverridePayload, OverrideType, blockingDates, errorMessage, prettyDate, prettyDateTime,
     prettyRange, useAvailabilityConfigs, useAvailabilityOverride, useAvailabilityOverrides, useBulkOverrides, useCreateOverride,

@@ -42,7 +42,7 @@ import {
 import { PageLoader } from "@/components/common/page-loader";
 import { useTranslation } from "@/hooks/use-translation";
 import type { City } from "@/types";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 

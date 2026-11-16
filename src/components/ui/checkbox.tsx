@@ -13,9 +13,7 @@ export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
     ({ checked = false, onCheckedChange, disabled, className, onClick, ...props }, ref) => {
         const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
             onClick?.(e);
-            if (!disabled && onCheckedChange) {
-                onCheckedChange(!checked);
-            }
+            if (!disabled && onCheckedChange) onCheckedChange(!checked);
         };
 
         return (
@@ -28,13 +26,17 @@ export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
                 disabled={disabled}
                 onClick={handleClick}
                 className={cn(
-                    'peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center',
-                    checked ? 'bg-primary text-primary-foreground' : 'bg-card text-transparent hover:border-primary/80',
+                    'peer flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border shadow-[0_1px_2px_rgba(16,24,40,0.05)] transition-[background-color,border-color,box-shadow] duration-150',
+                    'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/20',
+                    'disabled:cursor-not-allowed disabled:opacity-50',
+                    checked
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-input bg-background text-transparent hover:border-primary/60',
                     className
                 )}
                 {...props}
             >
-                {checked ? <Check className="h-3.5 w-3.5 font-bold stroke-[3]" /> : null}
+                <Check className={cn('h-3 w-3 stroke-[3.5] transition-transform duration-150', checked ? 'scale-100' : 'scale-0')} />
             </button>
         );
     }

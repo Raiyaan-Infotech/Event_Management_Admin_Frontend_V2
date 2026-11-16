@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { apiClient, isApprovalRequired } from '@/lib/api-client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 

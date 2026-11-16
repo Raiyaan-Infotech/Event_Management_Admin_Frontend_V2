@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { TranslationProvider } from "@/providers/translation-provider";
 import { AnalyticsProvider } from "@/components/providers/analytics-provider";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 
 const poppins = Poppins({
   subsets: ["latin"],

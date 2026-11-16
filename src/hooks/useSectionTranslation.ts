@@ -27,7 +27,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import {
   useBuilderLanguages,
   useContentTranslations,

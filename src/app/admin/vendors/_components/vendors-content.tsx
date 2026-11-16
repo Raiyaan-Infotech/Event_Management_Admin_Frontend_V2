@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { resolveMediaUrl } from '@/lib/utils';
 import { Plus, Store, ExternalLink } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { PageLoader } from '@/components/common/page-loader';
 import { TablePagination } from '@/components/common/table-pagination';
 

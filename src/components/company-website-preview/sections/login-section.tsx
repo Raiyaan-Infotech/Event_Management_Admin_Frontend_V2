@@ -32,7 +32,7 @@
  */
 
 import * as React from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { loginWebsiteClient } from '@/lib/website-client-auth';
 import { Mail, Lock, Eye, EyeOff, Send, ShieldCheck, Star, Sparkles, Users, LineChart } from 'lucide-react';
 import type { ThemeColors } from './preview-shared';

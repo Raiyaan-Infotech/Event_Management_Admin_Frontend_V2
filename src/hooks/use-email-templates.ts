@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, isApprovalRequired } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { EmailTemplate, CreateEmailTemplateDto, UpdateEmailTemplateDto } from '@/types';
 import type { PaginatedResponse, PaginationParams } from '@/lib/api-client';
 

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Icon, loadIcons } from '@iconify/react';
 import { Mail, MapPin, Phone, Send } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { ContactData, SocialLink, ThemeColors } from './preview-shared';
 
 import { useWebsiteLanguage } from '../website-language-provider';

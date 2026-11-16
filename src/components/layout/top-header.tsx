@@ -52,20 +52,12 @@ export function TopHeader() {
   const currentLanguage = languages.find(l => l.code === language) || languages[0];
   const currentCurrency = currencies.find(c => c.code === selectedCurrency) || currencies[0];
 
-  if (!mounted) {
-    return (
-      <div className="h-10 bg-muted/50 border-b-2 border-slate-200/90" />
-    );
-  }
+  if (!mounted) return null;
 
   return (
-    <div className="h-10 bg-muted/50 border-b-2 border-slate-200/90">
-      <div className="h-full flex items-center justify-between px-2 sm:px-4">
-        <div className="text-xs text-muted-foreground hidden sm:block">
-          {t('dashboard.welcome_admin')}
-        </div>
-
-        <div className="flex items-center gap-1 ml-auto">
+    <>
+      <>
+        <div className="flex items-center gap-0.5">
           {/* Company Switcher - Only for Developer */}
           {isDeveloper && (
             <CompanySwitcher />
@@ -74,7 +66,7 @@ export function TopHeader() {
           {/* Language Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs">
+              <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 text-xs text-muted-foreground">
                 <Globe className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">
                   {currentLanguage?.code?.toUpperCase() || "EN"}
@@ -106,7 +98,7 @@ export function TopHeader() {
           {/* Currency Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs">
+              <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 text-xs text-muted-foreground">
                 <DollarSign className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">
                   {currentCurrency?.code || "USD"}
@@ -139,7 +131,7 @@ export function TopHeader() {
           {/* Theme Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground">
                 <Sun className="h-3.5 w-3.5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Moon className="absolute h-3.5 w-3.5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                 <span className="sr-only">Toggle theme</span>
@@ -161,7 +153,7 @@ export function TopHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
-    </div>
+      </>
+    </>
   );
 }

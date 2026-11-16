@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { queryClient, queryKeys } from '@/lib/query-client';
 
 // Use the Next.js proxy route for same-domain cookie handling

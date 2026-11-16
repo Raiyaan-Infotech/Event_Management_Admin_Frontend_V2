@@ -88,7 +88,7 @@ export function AlertDialogPortal({ children }: { children: React.ReactNode }) {
 export function AlertDialogOverlay({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     return (
         <div
-            className={cn('fixed inset-0 z-50 bg-black/80 animate-in fade-in-0 duration-150', className)}
+            className={cn('fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px] animate-in fade-in-0 duration-150', className)}
             {...props}
         />
     );
@@ -105,10 +105,12 @@ export function AlertDialogContent({ className, children, ...props }: AlertDialo
 
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="fixed inset-0 bg-black/80 animate-in fade-in-0 duration-150" />
+            <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-[2px] animate-in fade-in-0 duration-150" />
             <div
+                role="alertdialog"
+                aria-modal="true"
                 className={cn(
-                    'relative z-50 grid w-full max-w-lg gap-4 border border-border bg-card p-6 shadow-2xl rounded-xl text-card-foreground animate-in zoom-in-95 duration-150',
+                    'relative z-50 grid w-full max-w-lg gap-4 border border-border bg-card p-6 shadow-[0_24px_48px_-12px_rgba(16,24,40,0.28)] rounded-2xl text-card-foreground animate-in fade-in-0 zoom-in-95 duration-200',
                     className
                 )}
                 {...props}
@@ -125,7 +127,7 @@ export function AlertDialogHeader({ className, ...props }: React.HTMLAttributes<
 }
 
 export function AlertDialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-    return <div className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)} {...props} />;
+    return <div className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)} {...props} />;
 }
 
 export function AlertDialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
@@ -162,7 +164,7 @@ export function AlertDialogCancel({ className, onClick, ...props }: React.Button
                 onClick?.(e);
                 setOpen(false);
             }}
-            className={cn(buttonVariants({ variant: 'outline' }), 'mt-2 sm:mt-0', className)}
+            className={cn(buttonVariants({ variant: 'outline' }), className)}
             {...props}
         />
     );

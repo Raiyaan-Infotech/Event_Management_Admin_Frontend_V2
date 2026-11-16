@@ -92,7 +92,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     --muted-foreground: 220 15% 82%;
     --accent: 220 35% 22%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72% 58%;
     --destructive-foreground: 0 0% 100%;
     --border: 220 20% 22%;
     --input: 220 20% 18%;
@@ -220,3 +220,82 @@ aside::-webkit-scrollbar-button {
   height: 0 !important;
 }
 
+
+/* Toast countdown bar (src/components/ui/toaster.tsx) */
+@keyframes toast-progress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* ── Admin design system: matches the Client Portal (module-kit) ───────── */
+
+/* Table inside a card runs edge-to-edge (no box inside a box). */
+.ui-card-content > .ui-table-root .ui-table-wrap {
+  margin-inline: -1rem;
+  width: auto;
+  border-radius: 0;
+  border-inline: 0;
+  border-bottom: 0;
+  box-shadow: none;
+}
+.ui-card-content:has(> .ui-table-root:first-child) { padding-top: 0; }
+.ui-card-content > .ui-table-root:first-child .ui-table-wrap { border-top: 0; }
+.ui-card-content > .ui-table-root:last-child .ui-table-wrap {
+  margin-bottom: -1rem;
+  border-bottom-left-radius: calc(0.75rem - 1px);
+  border-bottom-right-radius: calc(0.75rem - 1px);
+}
+
+/* Standard dialogs: tinted header strip + action bar, both pinned. */
+.ui-dialog[data-pad="default"] > .ui-dialog-header,
+.ui-dialog[data-pad="default"] > form > .ui-dialog-header {
+  position: sticky;
+  top: -1.25rem;
+  z-index: 10;
+  margin: -1.25rem -1.25rem 1rem;
+  padding: 0.875rem 3.5rem 0.75rem 1.25rem;
+  background: linear-gradient(hsl(var(--primary) / 0.05), hsl(var(--primary) / 0.05)), hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--primary) / 0.15);
+}
+.ui-dialog[data-pad="default"] > .ui-dialog-footer,
+.ui-dialog[data-pad="default"] > form > .ui-dialog-footer {
+  position: sticky;
+  bottom: -1.25rem;
+  z-index: 10;
+  margin: 1.25rem -1.25rem -1.25rem;
+  padding: 0.75rem 1.25rem;
+  background: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Add / Edit form dialogs open as a right slide-in panel (Client Portal FormPanel). */
+.ui-dialog[data-pad="default"]:has(> form) {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(520px, 100vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  border-width: 0 0 0 1px;
+  display: flex;
+  flex-direction: column;
+  animation: ui-panel-in 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.ui-dialog[data-pad="default"]:has(> form) > form {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+.ui-dialog[data-pad="default"]:has(> form) > form > .ui-dialog-footer {
+  margin-top: auto;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 1fr;
+  grid-auto-columns: 2fr;
+}
+.ui-dialog[data-pad="default"]:has(> form) > form > .ui-dialog-footer > * { width: 100%; }
+@keyframes ui-panel-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}

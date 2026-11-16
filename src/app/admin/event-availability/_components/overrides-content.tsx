@@ -304,8 +304,6 @@ export function OverridesContent() {
                                     <td className="px-2.5 py-2 text-xs"><span className="block max-w-[150px] truncate" title={o.reason || ""}>{o.reason || "—"}</span></td>
                                     <td className="px-2.5 py-2">
                                         <div className="flex items-center gap-1">
-                                            <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="View details" onClick={() => setViewId(o.id)}><Eye /></Button>
-                                            <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Edit override" onClick={() => setEditRow(o)}><Pencil /></Button>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild><Button variant="outline" size="icon" className="h-7 w-7" aria-label="More actions"><MoreVertical /></Button></DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-48">

@@ -197,6 +197,10 @@ interface FormState {
     frame_color: string;
     decoration_color: string;
     decoration_ids: number[];
+    // Event Logo — a sample logo, where it sits and its size
+    logo_image: string;
+    logo_position: Position;
+    logo_size: number;
     // step 3
     components: Record<ComponentKey, number>;
     component_order: ComponentKey[];
@@ -270,6 +274,9 @@ const emptyForm = (): FormState => ({
     frame_color: '',
     decoration_color: '',
     decoration_ids: [],
+    logo_image: '',
+    logo_position: 'top',
+    logo_size: 100,
     components: defaultComponents(),
     component_order: [...COMPONENT_KEYS],
     permissions: defaultPermissions(),
@@ -294,10 +301,11 @@ export function TemplateWizardContent() {
     const [errors, setErrors] = useState<Record<string, boolean>>({});
     const [tagDraft, setTagDraft] = useState('');
     const [loadedId, setLoadedId] = useState<string | null>(null);
-    const [uploading, setUploading] = useState<'background' | 'thumbnail' | null>(null);
+    const [uploading, setUploading] = useState<'background' | 'thumbnail' | 'logo' | null>(null);
 
     const backgroundInput = useRef<HTMLInputElement>(null);
     const thumbnailInput = useRef<HTMLInputElement>(null);
+    const logoInput = useRef<HTMLInputElement>(null);
 
     const { data: existing, isLoading: loadingTemplate } = useEventTemplate(id ?? undefined);
     const { data: categories } = useEventCategories({ limit: 200, is_active: true });
@@ -487,6 +495,9 @@ export function TemplateWizardContent() {
             frame_color: existing.frame_color ?? '',
             decoration_color: existing.decoration_color ?? '',
             decoration_ids: existing.decoration_ids ?? [],
+            logo_image: existing.logo_image ?? '',
+            logo_position: existing.logo_position ?? 'top',
+            logo_size: Number(existing.logo_size ?? 100) || 100,
             components: { ...defaultComponents(), ...(existing.components ?? {}) },
             component_order: normaliseOrder(existing.component_order),
             permissions: { ...defaultPermissions(), ...(existing.permissions ?? {}) },
@@ -550,7 +561,7 @@ export function TemplateWizardContent() {
         setTagDraft('');
     };
 
-    const uploadImage = async (file: File, target: 'background' | 'thumbnail') => {
+    const uploadImage = async (file: File, target: 'background' | 'thumbnail' | 'logo') => {
         /**
          * The uploader says "Max. 5MB", so it has to be true here and not only
          * on the server — otherwise the promise the label makes is kept by an
@@ -562,6 +573,7 @@ export function TemplateWizardContent() {
             );
             if (target === 'background' && backgroundInput.current) backgroundInput.current.value = '';
             if (target === 'thumbnail' && thumbnailInput.current) thumbnailInput.current.value = '';
+            if (target === 'logo' && logoInput.current) logoInput.current.value = '';
             return;
         }
 
@@ -572,6 +584,9 @@ export function TemplateWizardContent() {
             if (target === 'thumbnail') {
                 setField('thumbnail', result.url);
                 toast.success('Thumbnail uploaded');
+            } else if (target === 'logo') {
+                setField('logo_image', result.url);
+                toast.success('Event logo uploaded');
             } else {
                 /**
                  * Uploading a background image also SWITCHES Background Type to
@@ -617,6 +632,7 @@ export function TemplateWizardContent() {
             // Reset the input, or picking the SAME file again fires no change event.
             if (target === 'background' && backgroundInput.current) backgroundInput.current.value = '';
             if (target === 'thumbnail' && thumbnailInput.current) thumbnailInput.current.value = '';
+            if (target === 'logo' && logoInput.current) logoInput.current.value = '';
         }
     };
 
@@ -706,6 +722,9 @@ export function TemplateWizardContent() {
         frame_color: form.frame_color || null,
         decoration_color: form.decoration_color || null,
         decoration_ids: form.decoration_ids,
+        logo_image: form.logo_image || null,
+        logo_position: form.logo_position,
+        logo_size: form.logo_size,
 
         components: savedComponents(),
         component_order: form.component_order,
@@ -769,6 +788,9 @@ export function TemplateWizardContent() {
             secondary_font_size: form.secondary_font_size,
             frame_color: form.frame_color || null,
             decoration_color: form.decoration_color || null,
+            logo_image: form.logo_image || null,
+            logo_position: form.logo_position,
+            logo_size: form.logo_size,
             border_style: form.border_style,
             // Resolved from the live catalogues, not from the saved row: the
             // preview has to move the moment a tile is clicked, and the row does
@@ -2017,6 +2039,98 @@ export function TemplateWizardContent() {
                                             )}
                                         </div>
                                     </div>
+
+                                    {/*
+                                      Event Logo (Jamal, 2026-11-17): a SAMPLE logo /
+                                      monogram and where it sits. Each event shows the
+                                      host's own logo in this place once they upload
+                                      one (and on its splash screen); until then this
+                                      sample. No sample = no logo on this template.
+                                    */}
+                                    <div className="space-y-3 rounded-lg border border-border p-3 sm:col-span-2">
+                                        <div>
+                                            <Label className="text-xs font-semibold text-foreground">
+                                                Event Logo <span className="font-normal text-muted-foreground">(optional)</span>
+                                            </Label>
+                                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                                                Upload a sample logo or monogram. Each event replaces it with its own logo.
+                                            </p>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div className="flex items-start gap-3">
+                                                <div className="grid h-[86px] w-[86px] shrink-0 place-items-center overflow-hidden rounded-md border border-dashed border-border bg-muted/40">
+                                                    {form.logo_image ? (
+                                                        /* eslint-disable-next-line @next/next/no-img-element */
+                                                        <img src={form.logo_image} alt="Event logo" className="h-full w-full object-contain p-1.5" />
+                                                    ) : (
+                                                        <Heart className="h-6 w-6 text-muted-foreground" />
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col gap-1.5">
+                                                    <input
+                                                        ref={logoInput}
+                                                        type="file"
+                                                        accept="image/png,image/jpeg,image/webp"
+                                                        className="hidden"
+                                                        onChange={(e) => {
+                                                            const f = e.target.files?.[0];
+                                                            if (f) uploadImage(f, 'logo');
+                                                        }}
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="h-8 text-xs"
+                                                        disabled={uploading === 'logo'}
+                                                        onClick={() => logoInput.current?.click()}
+                                                    >
+                                                        {uploading === 'logo' ? (
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        ) : (
+                                                            <Upload className="h-3.5 w-3.5" />
+                                                        )}
+                                                        {uploading === 'logo' ? 'Uploading...' : form.logo_image ? 'Change' : 'Upload Logo'}
+                                                    </Button>
+                                                    {form.logo_image ? (
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 border-destructive/40 text-xs text-destructive hover:bg-destructive/5 hover:text-destructive"
+                                                            onClick={() => setField('logo_image', '')}
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                            Remove
+                                                        </Button>
+                                                    ) : null}
+                                                    <span className="text-[10.5px] text-muted-foreground">
+                                                        PNG with a transparent background works best. Max. 5MB.
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className={cn('space-y-3', !form.logo_image && 'pointer-events-none opacity-50')}>
+                                                <PositionGrid
+                                                    label="Logo Position"
+                                                    value={form.logo_position}
+                                                    onChange={(v) => setField('logo_position', v)}
+                                                />
+                                                <div className="space-y-1.5">
+                                                    <div className="flex items-center justify-between">
+                                                        <Label className="text-xs font-semibold text-foreground">Logo Size</Label>
+                                                        <span className="text-xs text-muted-foreground">{form.logo_size}%</span>
+                                                    </div>
+                                                    <Slider
+                                                        min={60}
+                                                        max={200}
+                                                        step={5}
+                                                        value={[form.logo_size]}
+                                                        onValueChange={(v) => setField('logo_size', v[0] ?? 100)}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                             </WizardCard>
@@ -2398,6 +2512,12 @@ export function TemplateWizardContent() {
                                             ['Orientation', `${form.orientation} (${form.dimension})`],
                                             ...designColourRows,
                                             ['Fonts', `${form.primary_font} · ${form.secondary_font}`],
+                                            [
+                                                'Event Logo',
+                                                form.logo_image
+                                                    ? `${POSITIONS.find((p) => p.value === form.logo_position)?.label ?? form.logo_position} · ${form.logo_size}%`
+                                                    : 'None',
+                                            ],
                                         ]}
                                     />
 

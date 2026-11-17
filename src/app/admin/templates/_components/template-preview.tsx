@@ -33,6 +33,7 @@ export type PreviewTemplate = Pick<
     | 'gradient_via' | 'image_position' | 'image_scale' | 'background_position'
     | 'image_size' | 'overlay_enabled' | 'overlay_color'
     | 'primary_font_size' | 'secondary_font_size' | 'frame_color' | 'decoration_color'
+    | 'logo_image' | 'logo_position' | 'logo_size'
 > & {
     /**
      * The chosen Frame Style's artwork, drawn OVER the whole card.
@@ -61,6 +62,16 @@ export type PreviewTemplate = Pick<
 const SAMPLE_QR = {
     size: 29,
     path: 'M0 0h7v1h-7zM12 0h1v1h-1zM14 0h2v1h-2zM19 0h1v1h-1zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM10 1h6v1h-6zM17 1h1v1h-1zM19 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM10 2h1v1h-1zM18 2h1v1h-1zM20 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h2v1h-2zM12 3h2v1h-2zM19 3h2v1h-2zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h2v1h-2zM13 4h3v1h-3zM17 4h3v1h-3zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM9 5h1v1h-1zM12 5h1v1h-1zM14 5h2v1h-2zM18 5h3v1h-3zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM11 7h1v1h-1zM15 7h1v1h-1zM17 7h3v1h-3zM0 8h1v1h-1zM2 8h1v1h-1zM4 8h1v1h-1zM6 8h1v1h-1zM9 8h3v1h-3zM17 8h1v1h-1zM20 8h1v1h-1zM24 8h1v1h-1zM27 8h1v1h-1zM3 9h2v1h-2zM7 9h1v1h-1zM9 9h5v1h-5zM16 9h1v1h-1zM20 9h1v1h-1zM22 9h1v1h-1zM25 9h1v1h-1zM28 9h1v1h-1zM0 10h2v1h-2zM3 10h1v1h-1zM6 10h1v1h-1zM8 10h3v1h-3zM14 10h1v1h-1zM18 10h1v1h-1zM20 10h3v1h-3zM26 10h3v1h-3zM2 11h1v1h-1zM5 11h1v1h-1zM7 11h2v1h-2zM12 11h7v1h-7zM20 11h2v1h-2zM24 11h1v1h-1zM27 11h1v1h-1zM3 12h2v1h-2zM6 12h2v1h-2zM9 12h1v1h-1zM12 12h1v1h-1zM14 12h4v1h-4zM19 12h4v1h-4zM25 12h1v1h-1zM27 12h2v1h-2zM1 13h2v1h-2zM7 13h2v1h-2zM10 13h1v1h-1zM12 13h1v1h-1zM14 13h1v1h-1zM16 13h1v1h-1zM21 13h2v1h-2zM25 13h1v1h-1zM28 13h1v1h-1zM1 14h2v1h-2zM4 14h6v1h-6zM13 14h1v1h-1zM17 14h1v1h-1zM23 14h3v1h-3zM27 14h2v1h-2zM0 15h4v1h-4zM5 15h1v1h-1zM8 15h2v1h-2zM12 15h1v1h-1zM15 15h1v1h-1zM17 15h1v1h-1zM19 15h2v1h-2zM25 15h1v1h-1zM27 15h1v1h-1zM0 16h2v1h-2zM3 16h1v1h-1zM6 16h3v1h-3zM11 16h2v1h-2zM16 16h2v1h-2zM20 16h3v1h-3zM25 16h1v1h-1zM27 16h2v1h-2zM5 17h1v1h-1zM7 17h1v1h-1zM12 17h2v1h-2zM16 17h3v1h-3zM20 17h3v1h-3zM25 17h2v1h-2zM28 17h1v1h-1zM0 18h1v1h-1zM6 18h1v1h-1zM10 18h2v1h-2zM14 18h1v1h-1zM17 18h1v1h-1zM20 18h2v1h-2zM27 18h2v1h-2zM1 19h5v1h-5zM9 19h1v1h-1zM11 19h4v1h-4zM17 19h1v1h-1zM19 19h4v1h-4zM25 19h1v1h-1zM27 19h1v1h-1zM0 20h1v1h-1zM3 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM10 20h1v1h-1zM14 20h1v1h-1zM17 20h1v1h-1zM20 20h5v1h-5zM8 21h2v1h-2zM12 21h1v1h-1zM14 21h1v1h-1zM16 21h1v1h-1zM20 21h1v1h-1zM24 21h1v1h-1zM26 21h3v1h-3zM0 22h7v1h-7zM11 22h1v1h-1zM13 22h1v1h-1zM18 22h3v1h-3zM22 22h1v1h-1zM24 22h2v1h-2zM27 22h2v1h-2zM0 23h1v1h-1zM6 23h1v1h-1zM10 23h2v1h-2zM16 23h3v1h-3zM20 23h1v1h-1zM24 23h2v1h-2zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM8 24h3v1h-3zM12 24h1v1h-1zM15 24h3v1h-3zM20 24h5v1h-5zM27 24h2v1h-2zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM10 25h2v1h-2zM13 25h1v1h-1zM17 25h2v1h-2zM24 25h1v1h-1zM26 25h3v1h-3zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM8 26h2v1h-2zM11 26h3v1h-3zM21 26h1v1h-1zM23 26h3v1h-3zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h1v1h-1zM11 27h2v1h-2zM14 27h4v1h-4zM19 27h2v1h-2zM27 27h1v1h-1zM0 28h7v1h-7zM8 28h5v1h-5zM14 28h1v1h-1zM16 28h2v1h-2zM19 28h2v1h-2zM23 28h2v1h-2zM27 28h2v1h-2z',
+};
+
+/** Where a corner / side Event Logo sits inside the safe area. */
+const LOGO_CORNER: Record<string, string> = {
+    'top-left': 'left-0 top-0',
+    'top-right': 'right-0 top-0 justify-end',
+    left: 'left-0 top-1/2 -translate-y-1/2',
+    right: 'right-0 top-1/2 -translate-y-1/2 justify-end',
+    'bottom-left': 'left-0 bottom-0',
+    'bottom-right': 'right-0 bottom-0 justify-end',
 };
 
 const SAMPLE = {
@@ -416,6 +427,22 @@ export function TemplatePreview({
      * behind the content at low opacity rather than dropped, so choosing it still
      * has a visible consequence.
      */
+    /**
+     * Event Logo (2026-11-17). Top / centre / bottom join the column of content,
+     * so the logo can never sit on top of the names; a corner or side pins it
+     * there inside the safe area. 18% of the card wide at 100%.
+     */
+    const logoUrl = template.logo_image || null;
+    const logoPos = (template.logo_position ?? 'top') as string;
+    const logoInFlow = !!logoUrl && ['top', 'center', 'bottom'].includes(logoPos);
+    const logoWidth = `${(18 * Math.min(Math.max(Number(template.logo_size) || 100, 60), 200)) / 100}%`;
+    const logoEl = logoUrl ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img src={logoUrl} alt="" data-event-logo
+            className="pointer-events-none block h-auto object-contain"
+            style={{ width: logoInFlow ? logoWidth : '100%', maxHeight: logoInFlow ? '22%' : undefined }} />
+    ) : null;
+
     const decorations = template.decorationItems ?? [];
     const placed = (type: string) => decorations.filter((d) => d.type === type && d.file_url);
 
@@ -1043,18 +1070,28 @@ export function TemplatePreview({
                             className="flex w-full flex-col items-center justify-evenly gap-1.5"
                             style={{ minHeight: '86%', transform: `scale(${fit})`, transformOrigin: 'center center' }}
                         >
-                            {visible.length === 0 ? (
+                            {logoInFlow && logoPos === 'top' && logoEl}
+                            {visible.length === 0 && !logoUrl ? (
                                 <div className="px-4 text-center text-[10px] text-muted-foreground">
                                     Every component is switched off, so this invitation would render empty.
                                 </div>
                             ) : (
-                                visible.map((key) => (
-                                    <div key={key} style={{ zoom: blockZoom(key) }}>
-                                        {blocks[key]}
+                                visible.map((key, i) => (
+                                    <div key={key} className="contents">
+                                        {logoInFlow && logoPos === 'center' && i === Math.floor(visible.length / 2) && logoEl}
+                                        <div style={{ zoom: blockZoom(key) }}>
+                                            {blocks[key]}
+                                        </div>
                                     </div>
                                 ))
                             )}
+                            {logoInFlow && (logoPos === 'bottom' || (logoPos === 'center' && visible.length === 0)) && logoEl}
                         </div>
+                        {logoUrl && !logoInFlow && (
+                            <div className={cn('pointer-events-none absolute z-[5] flex', LOGO_CORNER[logoPos])} style={{ width: logoWidth }}>
+                                {logoEl}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

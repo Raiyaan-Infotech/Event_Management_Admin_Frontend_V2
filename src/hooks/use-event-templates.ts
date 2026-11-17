@@ -580,6 +580,14 @@ export interface EventTemplate {
     decoration_color?: string | null;
     /** Step 2's Decorations — ids into `decorations`, in display order. */
     decoration_ids: number[];
+    /**
+     * Step 2's Event Logo (2026-11-17): a SAMPLE logo / monogram, where it sits
+     * and its size (% of standard). An event shows the host's own logo in this
+     * place when they uploaded one. Null image = no logo slot.
+     */
+    logo_image?: string | null;
+    logo_position?: Position;
+    logo_size?: number;
 
     // step 3 — WHETHER a component shows, and WHERE. Two fields on purpose:
     // toggling one off and on again must not send it to the bottom of the list.

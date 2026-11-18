@@ -24,7 +24,6 @@ import {
   useSettingsByGroup,
   useBulkUpdateSettings,
 } from "@/hooks/use-settings";
-import { useIsPluginActive } from "@/hooks/use-plugins";
 import { PermissionGuard } from "@/components/guards/permission-guard";
 import { PageLoader } from '@/components/common/page-loader';
 
@@ -40,10 +39,10 @@ export function MediaContent() {
   const { data: settings, isLoading } = useSettingsByGroup("media");
   const bulkUpdateMutation = useBulkUpdateSettings();
 
-  const s3Active = useIsPluginActive("amazon-s3");
-  const r2Active = useIsPluginActive("cloudflare-r2");
-  const doActive = useIsPluginActive("digitalocean-spaces");
-  const wbActive = useIsPluginActive("wasabi");
+  const s3Active = true;
+  const r2Active = true;
+  const doActive = true;
+  const wbActive = true;
 
   const pluginActiveMap: Record<string, boolean> = {
     "amazon-s3": s3Active,
@@ -435,12 +434,6 @@ export function MediaContent() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {drivers.length === 1 && (
-                    <p className="text-xs text-muted-foreground pt-1">
-                      No cloud storage plugins enabled.{" "}
-                      <a href="/admin/plugins" className="text-primary hover:underline">Enable them in Plugins →</a>
-                    </p>
-                  )}
                 </div>
               </CardContent>
             </Card>

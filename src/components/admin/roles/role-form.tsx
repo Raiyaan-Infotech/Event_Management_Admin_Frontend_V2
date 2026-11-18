@@ -19,7 +19,6 @@ import {
   useAssignPermissions,
 } from "@/hooks/use-roles";
 import { usePermissions } from "@/hooks/use-permissions";
-import { usePlugins } from "@/hooks/use-plugins";
 import { cn } from "@/lib/utils";
 import { isApprovalRequired } from "@/lib/api-client";
 import type { Role, Permission } from "@/types";
@@ -230,38 +229,7 @@ export function RoleForm({ role, onSuccess }: RoleFormProps) {
   const assignPermissionsMutation = useAssignPermissions();
   const { data: permissionsData, isLoading: permissionsLoading } =
     usePermissions({ limit: 500 });
-  const { data: pluginsData } = usePlugins();
-
-  // Module → plugin slug mapping (only plugin-gated modules)
-  const MODULE_PLUGIN_MAP: Record<string, string> = {
-    blog: "blog",
-    blog_categories: "blog",
-    blog_tags: "blog",
-    faqs: "faq",
-    faq_categories: "faq",
-    announcements: "announcements",
-    testimonials: "testimonials",
-    pages: "pages",
-    ads: "ads",
-    banners: "ads",
-    contact: "contact-form",
-    simple_sliders: "simple-slider",
-    locations: "locations",
-  };
-
-  // Build active plugin set. While pluginsData is loading, show everything (no flash)
-  const activePluginSlugs = new Set(
-    (pluginsData?.plugins ?? []).filter((p) => p.is_active === 1).map((p) => p.slug)
-  );
-
-  // Filter: hide permissions whose module belongs to an inactive plugin
-  const filteredPermissions = pluginsData
-    ? (permissionsData?.data ?? []).filter((p) => {
-        const pluginSlug = MODULE_PLUGIN_MAP[p.module ?? ""];
-        if (!pluginSlug) return true; // Core module — always visible
-        return activePluginSlugs.has(pluginSlug);
-      })
-    : (permissionsData?.data ?? []);
+  const filteredPermissions = permissionsData?.data ?? [];
 
   const [expandedSubModules, setExpandedSubModules] = useState<Set<string>>(
     new Set(),

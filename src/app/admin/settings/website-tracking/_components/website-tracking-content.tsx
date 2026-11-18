@@ -19,7 +19,6 @@ import {
   useSettingsByGroup,
   useBulkUpdateSettings,
 } from "@/hooks/use-settings";
-import { useIsPluginActive } from "@/hooks/use-plugins";
 import { PermissionGuard } from "@/components/guards/permission-guard";
 import { PageLoader } from '@/components/common/page-loader';
 
@@ -27,8 +26,8 @@ export function WebsiteTrackingContent() {
   const { data: settings, isLoading } = useSettingsByGroup("analytics");
   const bulkUpdateMutation = useBulkUpdateSettings();
 
-  const gtmEnabled = useIsPluginActive("google-tag-manager");
-  const ga4Enabled = useIsPluginActive("google-analytics");
+  const gtmEnabled = true;
+  const ga4Enabled = true;
 
   const [values, setValues] = useState({
     tracking_type: "gtm",
@@ -87,12 +86,7 @@ export function WebsiteTrackingContent() {
             </div>
 
             {/* Tracking Type Selection */}
-            {!gtmEnabled && !ga4Enabled ? (
-              <div className="flex items-center gap-3 p-4 rounded-lg border border-dashed text-sm text-muted-foreground">
-                <span>No analytics plugins are enabled.</span>
-                <a href="/admin/plugins" className="text-primary hover:underline font-medium">Enable them in Plugins →</a>
-              </div>
-            ) : (
+            {(
               <Card>
                 <CardContent className="pt-6">
                   <RadioGroup

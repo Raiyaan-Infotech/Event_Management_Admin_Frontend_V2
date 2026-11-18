@@ -82,7 +82,6 @@ import { useSettingsByGroup } from "@/hooks/use-settings";
 import { useTranslation } from "@/hooks/use-translation";
 import { useAuth } from "@/hooks/use-auth";
 import { usePermissionCheck } from "@/hooks";
-import { usePlugins } from "@/hooks/use-plugins";
 import { PageLoader } from "@/components/common/page-loader";
 import { useUiBlocksData } from "@/hooks/useUiBlocks";
 
@@ -254,10 +253,7 @@ const menuItems: MenuItem[] = [
     labelKey: "nav.communication",
     icon: MessageSquare,
     children: [
-      { labelKey: "nav.notifications", href: "/admin/notifications", icon: Bell, permission: "notifications.view" },
       { labelKey: "Push Notifications", href: "/admin/settings/push-notifications", icon: Bell, permission: "settings.view" },
-      { labelKey: "nav.mail", href: "/admin/mail", icon: Mail, permission: "mail.view" },
-      { labelKey: "Chat", href: "/admin/communication/chat", icon: MessageCircle },
       { labelKey: "nav.support", href: "/admin/support", icon: MessageCircle, permission: "support.view" },
       { labelKey: "nav.contact", href: "/admin/contact", icon: Phone, permission: "contact.view" },
     ],
@@ -292,23 +288,6 @@ const menuItems: MenuItem[] = [
       { labelKey: "nav.plan_types", href: "/admin/plan-types", icon: Repeat, permission: "plan_types.view" },
       { labelKey: "nav.plan_badges", href: "/admin/subscriptions/badges", icon: Award, permission: "plan_badges.view" },
     ],
-  },
-  {
-    labelKey: "nav.faqs",
-    icon: HelpCircle,
-    permission: "faqs.view",
-    pluginSlug: "faq",
-    children: [
-      { labelKey: "nav.faq_list", href: "/admin/faqs", icon: HelpCircle, permission: "faqs.view" },
-      { labelKey: "nav.faq_categories", href: "/admin/faq-categories", icon: FileQuestion, permission: "faq_categories.view" },
-    ],
-  },
-  {
-    labelKey: "nav.payments",
-    href: "/admin/payments",
-    icon: CreditCard,
-    permission: "payments.view",
-    badge: "Coming Soon",
   },
   {
     labelKey: "Website Builder",
@@ -534,12 +513,6 @@ export function AppSidebar() {
   const { hasPermission, isDeveloper, hasMinLevel } = usePermissionCheck();
   const isLoading = !user;
 
-  // Plugin active state
-  const { data: pluginsData } = usePlugins();
-  const activePluginSlugs = new Set(
-    (pluginsData?.plugins ?? []).filter((p) => p.is_active === 1).map((p) => p.slug)
-  );
-
   // UI Block visibility state — hides sidebar items when their block is toggled OFF
   const { data: uiBlocks } = useUiBlocksData();
   const uiBlockVisibility = new Map<string, boolean>(
@@ -560,11 +533,6 @@ export function AppSidebar() {
 
     // Permission check
     if (!hasPermission(item.permission)) {
-      return false;
-    }
-
-    // Plugin check — only hide if plugins are loaded AND plugin is explicitly inactive
-    if (item.pluginSlug && pluginsData && !activePluginSlugs.has(item.pluginSlug)) {
       return false;
     }
 

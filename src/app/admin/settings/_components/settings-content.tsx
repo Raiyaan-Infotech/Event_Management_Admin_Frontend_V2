@@ -140,14 +140,6 @@ const settingGroups: SettingGroup[] = [
         permission: "settings.view",
       },
       {
-        labelKey: "settings.email_campaigns",
-        descriptionKey: "settings.email_campaigns_desc",
-        href: "/admin/settings/email/campaigns",
-        icon: Mail,
-        badge: "common.comming",
-        permission: "email_campaigns.read",
-      },
-      {
         labelKey: "settings.phone_number",
         descriptionKey: "settings.phone_number_desc",
         href: "/admin/settings/phone",
@@ -180,13 +172,6 @@ const settingGroups: SettingGroup[] = [
         href: "/admin/platform/modules",
         icon: Shield,
         permission: "modules.view",
-      },
-      {
-        labelKey: "nav.plugins",
-        descriptionKey: "settings.plugins_desc",
-        href: "/admin/plugins",
-        icon: Puzzle,
-        permission: "plugins.view",
       },
     ],
   },
@@ -239,13 +224,6 @@ const settingGroups: SettingGroup[] = [
         href: "/admin/platform/users",
         icon: Users,
         permission: "employees.view",
-      },
-      {
-        labelKey: "nav.departments",
-        descriptionKey: "settings.departments_desc",
-        href: "/admin/platform/departments",
-        icon: Building2,
-        permission: "departments.view",
       },
       {
         labelKey: "nav.roles",

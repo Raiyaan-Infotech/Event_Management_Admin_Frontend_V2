@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useSettingsByGroup, useBulkUpdateSettings } from "@/hooks/use-settings";
-import { useIsPluginActive } from "@/hooks/use-plugins";
 import { PermissionGuard } from "@/components/guards/permission-guard";
 import { PageLoader } from '@/components/common/page-loader';
 
@@ -23,8 +22,8 @@ export function SocialLoginContent() {
   const { data: settings, isLoading } = useSettingsByGroup("social_login");
   const bulkUpdateMutation = useBulkUpdateSettings();
 
-  const googleEnabled = useIsPluginActive("google-oauth");
-  const facebookEnabled = useIsPluginActive("facebook-oauth");
+  const googleEnabled = true;
+  const facebookEnabled = true;
 
   const [showSecrets, setShowSecrets] = useState({
     google: false,
@@ -95,13 +94,6 @@ export function SocialLoginContent() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {!googleEnabled && !facebookEnabled && (
-                <div className="col-span-full flex items-center gap-3 p-4 rounded-lg border border-dashed text-sm text-muted-foreground">
-                  <span>No social login providers are enabled.</span>
-                  <a href="/admin/plugins" className="text-primary hover:underline font-medium">Enable them in Plugins →</a>
-                </div>
-              )}
-
               {/* Google OAuth Card */}
               {googleEnabled && (
                 <Card>

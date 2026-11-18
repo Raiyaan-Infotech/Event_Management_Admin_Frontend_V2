@@ -22,7 +22,6 @@ import { TopHeader } from "@/components/layout/top-header";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import { useAuth, useLogout } from "@/hooks";
 import { usePendingCount, useApprovals } from "@/hooks/use-approvals";
-import { useMailNotifications, useMarkNotificationsRead } from "@/hooks/use-admin-mail";
 
 export default function AdminNavbar() {
   const pathname = usePathname();
@@ -30,11 +29,6 @@ export default function AdminNavbar() {
   const logoutMutation = useLogout();
   const { data: pendingCount = 0 } = usePendingCount();
   const { data: recentApprovals } = useApprovals({ is_active: 2, limit: 5 });
-  const { data: notifData } = useMailNotifications();
-  const markNotifRead = useMarkNotificationsRead();
-  const mailUnread = notifData?.unread_count ?? 0;
-  const mailNotifs = notifData?.notifications ?? [];
-
   const isWebsiteBuilder = pathname?.includes('website-builder') || pathname?.includes('website-preview');
 
   const handleLogout = () => {
@@ -91,64 +85,6 @@ export default function AdminNavbar() {
               <span className="hidden sm:inline">Preview Website</span>
             </Link>
           </Button>
-            {/* Mail Notifications Bell */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Mail className="h-[18px] w-[18px]" />
-                {mailUnread > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-medium">
-                    {mailUnread > 99 ? "99+" : mailUnread}
-                  </span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[320px] p-0 border-border rounded-2xl shadow-xl mt-2 overflow-hidden">
-              <div className="p-4 border-b border-border flex justify-between items-center bg-muted/30">
-                <h3 className="font-bold text-sm">
-                  Mail {mailUnread > 0 && <span className="ml-1.5 text-[10px] bg-rose-500 text-white rounded-full px-1.5 py-0.5 font-black">{mailUnread}</span>}
-                </h3>
-                <Button variant="ghost" size="sm" className="text-xs h-7 text-primary hover:text-primary hover:bg-primary/5 font-bold"
-                  onClick={() => markNotifRead.mutate()}>
-                  <CheckCheck className="size-3 mr-1" /> Mark all read
-                </Button>
-              </div>
-              <ScrollArea className="h-[200px]">
-                <div className="p-2 space-y-1">
-                  {mailNotifs.length === 0 ? (
-                    <div className="py-8 text-center text-muted-foreground text-xs">No notifications</div>
-                  ) : mailNotifs.map((notif) => (
-                    <Link key={notif.id} href={`/admin/mail?mailId=${notif.mail_id}`}
-                      className="flex gap-3 p-3 rounded-lg hover:bg-muted transition-all group">
-                      <div className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center border bg-indigo-500/10 text-indigo-500 border-indigo-500/20">
-                        <Mail className="size-3.5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-[12px] font-bold text-foreground group-hover:text-primary transition-colors ${notif.is_read ? "opacity-70" : ""}`}>New Mail</span>
-                            {!notif.is_read && <span className="size-1.5 bg-indigo-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />}
-                          </div>
-                          <span className="text-[10px] text-muted-foreground whitespace-nowrap font-medium">
-                            {notif.mail?.sent_at ? new Date(notif.mail.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                          </span>
-                        </div>
-                        <p className={`text-[11px] text-muted-foreground truncate ${notif.is_read ? "opacity-60" : ""}`}>
-                          {notif.mail?.subject || 'No subject'}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </ScrollArea>
-              <div className="p-3 text-center border-t border-border bg-card">
-                <Link href="/admin/notifications">
-                  <Button variant="link" className="text-xs text-primary font-bold h-auto p-0">View All Notifications</Button>
-                </Link>
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {/* Pending Approvals Bell — super_admin / developer only */}
           {((user?.role?.level ?? 0) >= 100 ||
             user?.role?.slug === "super_admin" ||

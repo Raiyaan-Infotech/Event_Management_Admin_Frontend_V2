@@ -26,7 +26,6 @@ import { useRoles } from "@/hooks/use-roles";
 import { useAuth } from "@/hooks/use-auth";
 import { useCountries, useStates, useCities, useLocalities } from "@/hooks/use-locations";
 import { getUserRoleLevel, isDeveloper, isSuperAdmin } from "@/lib/auth-utils";
-import { useDepartments } from "@/hooks/use-departments";
 import type { User } from "@/types";
 
 const makeEmployeeSchema = (isEditMode: boolean) =>
@@ -94,7 +93,6 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
   const createUserMutation = useCreateUser();
   const updateUserMutation = useUpdateUser();
   const { data: rolesData } = useRoles({ limit: 100 });
-  const { data: departmentsData } = useDepartments({ limit: 200 });
 
   const currentUserLevel = getUserRoleLevel(currentUser);
   const targetUserLevel = user?.role?.level ?? 0;
@@ -404,21 +402,6 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
           <CardTitle className="text-base">Past Work Information</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Department</Label>
-            <Select
-              value={watch("department_id")?.toString() || ""}
-              onValueChange={(v) => setValue("department_id", v ? parseInt(v) : null)}
-            >
-              <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
-              <SelectContent>
-                {departmentsData?.data?.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id.toString()}>{dept.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="designation">Designation</Label>
             <Input id="designation" placeholder="Enter designation" {...register("designation")} />

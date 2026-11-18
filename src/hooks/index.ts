@@ -38,10 +38,8 @@ export * from './use-companies';
 export * from './use-approvals';
 
 // Plugin hooks
-export * from './use-plugins';
 
 // Payment hooks
-export * from './use-payments';
 
 // Utility hooks
 export * from './use-debounce';

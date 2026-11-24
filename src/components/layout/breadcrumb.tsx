@@ -79,6 +79,9 @@ export default function Breadcrumb() {
      * is keyed by segment name alone. Without this check the second one
      * always read as "Email Templates" — the label the FIRST one owns.
      */
+    if (segment === "templates" && segments[index - 1] === "notifications") {
+      return "Message Templates";
+    }
     if (segment === "templates" && segments[index - 1] !== "settings") {
       return "Invitation";
     }

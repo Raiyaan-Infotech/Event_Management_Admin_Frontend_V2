@@ -267,7 +267,7 @@ const menuItems: MenuItem[] = [
     icon: FileEdit,
     children: [
       {
-        labelKey: "Transactional Templates",
+        labelKey: "Message Templates",
         href: "/admin/notifications/templates",
         icon: FileEdit,
         permission: "notification_templates.view",

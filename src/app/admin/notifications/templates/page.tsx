@@ -1,30 +1,27 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    Plus,
-    Search,
-    RotateCcw,
-    MoreVertical,
-    Pencil,
+    Bell,
     Copy,
     Eye,
+    Layers,
+    Mail,
+    MessageCircle,
+    MoreHorizontal,
+    Pencil,
+    Plus,
+    Power,
+    RotateCcw,
+    Search,
+    Send,
     Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -32,79 +29,73 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TablePagination } from '@/components/common/table-pagination';
-import { DeleteDialog } from '@/components/common/delete-dialog';
 import { PageLoader } from '@/components/common/page-loader';
 import { PermissionGuard } from '@/components/guards/permission-guard';
 import { DynamicIcon } from '@/components/common/dynamic-icon';
-import { TemplatePreviewModal } from './_components/template-preview-modal';
 import { cn } from '@/lib/utils';
-import { useEventCategories } from '@/hooks/use-menu-management';
+import { useQueryParam } from '@/lib/client-only';
 import { useNotificationCategories } from '@/hooks/use-notification-categories';
 import {
     useNotificationTemplates,
+    useNotificationTemplateCounts,
+    useSystemTriggers,
     useUpdateNotificationTemplateStatus,
     useDuplicateNotificationTemplate,
     useDeleteNotificationTemplate,
+    type NotificationTemplate,
 } from '@/hooks/use-notification-templates';
+import { AUDIENCES, AUDIENCE_LABELS, ChannelIcons, formatDateTime, templateCode } from './_components/template-shared';
+import { SendTestDialog, StatusPill } from './_components/send-test-dialog';
+import { DeleteTemplateDialog } from './_components/delete-template-dialog';
 
 const ALL = 'all';
+const BASE = '/admin/notifications/templates';
+
+const CHANNEL_TABS = [
+    { key: ALL, label: 'All Templates', icon: Layers, count: 'all' },
+    { key: 'email', label: 'Email', icon: Mail, count: 'email' },
+    { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, count: 'whatsapp' },
+    { key: 'in_app', label: 'In-App (Push)', icon: Bell, count: 'in_app' },
+] as const;
 
 export default function NotificationTemplatesPage() {
     const router = useRouter();
 
+    // Old links (?preview=<id>) open the new View Details page.
+    const previewParam = useQueryParam('preview');
+    const [redirected, setRedirected] = useState(false);
+    if (previewParam && !redirected && Number(previewParam) > 0) {
+        setRedirected(true);
+        router.replace(`${BASE}/${Number(previewParam)}`);
+    }
+
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
     const [search, setSearch] = useState('');
-    const [categoryTab, setCategoryTab] = useState<string>(ALL);
-    const [eventCategoryId, setEventCategoryId] = useState(ALL);
+    const [channel, setChannel] = useState<string>(ALL);
+    const [categoryId, setCategoryId] = useState(ALL);
+    const [audience, setAudience] = useState(ALL);
     const [status, setStatus] = useState(ALL);
-    const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [previewId, setPreviewId] = useState<number | null>(null);
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            const pId = params.get('preview');
-            if (pId) {
-                const parsed = Number(pId);
-                if (Number.isInteger(parsed) && parsed > 0) {
-                    setPreviewId(parsed);
-                }
-            }
-        }
-    }, []);
+    const [deleteRow, setDeleteRow] = useState<NotificationTemplate | null>(null);
+    const [testId, setTestId] = useState<number | null>(null);
 
     const { data: notificationCategories } = useNotificationCategories({ limit: 200, is_active: true });
-    const { data: eventCategories } = useEventCategories({ limit: 200, is_active: true });
-
-    // Counts per tab — a single wide fetch, counted client-side. Template
-    // volume here is tens, not thousands, so this stays cheap.
-    const { data: countsData } = useNotificationTemplates({ limit: 1000 });
-    const counts = useMemo(() => {
-        const byCategory: Record<number, number> = {};
-        (countsData?.data ?? []).forEach((t) => {
-            byCategory[t.notification_category_id] = (byCategory[t.notification_category_id] ?? 0) + 1;
-        });
-        return byCategory;
-    }, [countsData]);
-    const totalCount = countsData?.data?.length ?? 0;
+    const { data: counts } = useNotificationTemplateCounts();
+    const { data: catalog } = useSystemTriggers();
+    const triggerMap = useMemo(() => new Map((catalog?.triggers ?? []).map((t) => [t.key, t])), [catalog]);
 
     const { data, isLoading } = useNotificationTemplates({
         page,
         limit,
         search: search || undefined,
-        notification_category_id: categoryTab === ALL ? undefined : categoryTab,
-        event_category_id: eventCategoryId === ALL ? undefined : eventCategoryId,
+        channel: channel === ALL ? undefined : channel,
+        notification_category_id: categoryId === ALL ? undefined : categoryId,
+        audience: audience === ALL ? undefined : audience,
         is_active: status === ALL ? undefined : status === 'active',
+        sort_by: 'updated_at',
+        sort_order: 'DESC',
     });
 
     const updateStatus = useUpdateNotificationTemplateStatus();
@@ -113,187 +104,97 @@ export default function NotificationTemplatesPage() {
 
     const templates = data?.data ?? [];
     const pagination = data?.pagination ?? null;
-    const hasFilters =
-        !!search || categoryTab !== ALL || eventCategoryId !== ALL || status !== ALL;
+    const hasFilters = !!search || channel !== ALL || categoryId !== ALL || audience !== ALL || status !== ALL;
 
+    const resetPage = <T,>(set: (v: T) => void) => (v: T) => { set(v); setPage(1); };
     const clearFilters = () => {
-        setSearch('');
-        setCategoryTab(ALL);
-        setEventCategoryId(ALL);
-        setStatus(ALL);
-        setPage(1);
+        setSearch(''); setChannel(ALL); setCategoryId(ALL); setAudience(ALL); setStatus(ALL); setPage(1);
     };
 
-    const previewTemplate = (id: number) => {
-        setPreviewId(id);
-        if (typeof window !== 'undefined') {
-            const url = new URL(window.location.href);
-            url.searchParams.set('preview', String(id));
-            window.history.replaceState({}, '', url.toString());
-        }
-    };
-
-    const handleClosePreview = () => {
-        setPreviewId(null);
-        if (typeof window !== 'undefined') {
-            const url = new URL(window.location.href);
-            if (url.searchParams.has('preview')) {
-                url.searchParams.delete('preview');
-                window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
-            }
-        }
-    };
-
-    // The status switch saves too — without it in here, flipping Active/Inactive
-    // showed no loader at all while the request ran.
-    const isBusy =
-        isLoading || updateStatus.isPending || duplicateTemplate.isPending || deleteTemplate.isPending;
+    const isBusy = isLoading || updateStatus.isPending || duplicateTemplate.isPending;
 
     return (
         <PermissionGuard permission="notification_templates.view">
             <div className="space-y-5">
-                <PageLoader open={isBusy} text={updateStatus.isPending ? "Updating status..." : "Loading..."} />
+                <PageLoader open={isBusy} text={updateStatus.isPending ? 'Updating status...' : 'Loading...'} />
 
                 <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <h1 className="text-xl font-extrabold tracking-tight text-foreground">
-                            Transactional Notification Templates
-                        </h1>
-                        <p className="text-xs text-muted-foreground">
-                            Create and manage system generated notifications for RSVPs, reminders, invitations and more.
-                        </p>
+                    <div className="flex items-center gap-3">
+                        <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            <Mail className="h-6 w-6" />
+                        </span>
+                        <div>
+                            <h1 className="text-xl font-extrabold tracking-tight text-foreground">Manage Message Templates</h1>
+                            <p className="text-xs text-muted-foreground">
+                                View, manage and monitor all Email, WhatsApp and In-App notification templates.
+                            </p>
+                        </div>
                     </div>
-                    <Button onClick={() => router.push('/admin/notifications/templates/create')} className="h-9 gap-2">
-                        <Plus className="h-4 w-4" /> Add Template
+                    <Button onClick={() => router.push(`${BASE}/create`)} className="h-10 gap-2">
+                        <Plus className="h-4 w-4" /> Create Template
                     </Button>
                 </div>
 
-                <Tabs
-                    value={categoryTab}
-                    onValueChange={(v) => {
-                        setCategoryTab(v);
-                        setPage(1);
-                    }}
-                >
-                    <TabsList className="h-auto flex-wrap justify-start gap-1 bg-muted/40 p-1">
-                        <TabsTrigger value={ALL} className="gap-1.5">
-                            All Templates <span className="text-[11px] opacity-70">({totalCount})</span>
-                        </TabsTrigger>
-                        {(notificationCategories?.data ?? []).map((c) => (
-                            <TabsTrigger key={c.id} value={String(c.id)} className="gap-1.5">
-                                <DynamicIcon name={c.icon} color={c.color} size="h-3.5 w-3.5" />
-                                {c.name} <span className="text-[11px] opacity-70">({counts[c.id] ?? 0})</span>
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
-                </Tabs>
+                <div className="flex flex-wrap gap-2">
+                    {CHANNEL_TABS.map((tab) => {
+                        const active = channel === tab.key;
+                        return (
+                            <button
+                                key={tab.key}
+                                type="button"
+                                onClick={() => resetPage(setChannel)(tab.key)}
+                                className={cn(
+                                    'inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-medium transition-colors',
+                                    active
+                                        ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                                        : 'border-border bg-card text-foreground hover:bg-muted',
+                                )}
+                            >
+                                <tab.icon className="h-4 w-4" />
+                                {tab.label} <span className={cn('text-xs', active ? 'opacity-90' : 'text-muted-foreground')}>({counts?.[tab.count] ?? 0})</span>
+                            </button>
+                        );
+                    })}
+                </div>
 
                 <Card className="border-border bg-card shadow-xs">
-                    <CardContent className="space-y-3 p-4">
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                            <div className="space-y-1.5 lg:col-span-2">
-                                <Label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                    Search
-                                </Label>
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                        value={search}
-                                        onChange={(e) => {
-                                            setSearch(e.target.value);
-                                            setPage(1);
-                                        }}
-                                        placeholder="Search templates by name, title or content..."
-                                        className="h-10 pl-9"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                    Notification Category
-                                </Label>
-                                <Select
-                                    value={categoryTab}
-                                    onValueChange={(v) => {
-                                        setCategoryTab(v);
-                                        setPage(1);
-                                    }}
-                                >
-                                    <SelectTrigger className="h-10">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value={ALL}>All Notification Categories</SelectItem>
-                                        {(notificationCategories?.data ?? []).map((c) => (
-                                            <SelectItem key={c.id} value={String(c.id)}>
-                                                {c.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                    Event Category
-                                </Label>
-                                <Select
-                                    value={eventCategoryId}
-                                    onValueChange={(v) => {
-                                        setEventCategoryId(v);
-                                        setPage(1);
-                                    }}
-                                >
-                                    <SelectTrigger className="h-10">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value={ALL}>All Categories</SelectItem>
-                                        {(eventCategories?.data ?? []).map((c) => (
-                                            <SelectItem key={c.id} value={String(c.id)}>
-                                                {c.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Status + Reset share the row's last column — the
-                                grid is 5 wide and the fields above fill 4. */}
-                            <div className="flex items-end gap-2">
-                                <div className="min-w-0 flex-1 space-y-1.5">
-                                    <Label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                        Status
-                                    </Label>
-                                    <Select
-                                        value={status}
-                                        onValueChange={(v) => {
-                                            setStatus(v);
-                                            setPage(1);
-                                        }}
-                                    >
-                                        <SelectTrigger className="h-10">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value={ALL}>All Status</SelectItem>
-                                            <SelectItem value="active">Active</SelectItem>
-                                            <SelectItem value="inactive">Inactive</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={clearFilters}
-                                    disabled={!hasFilters}
-                                    className="h-10 shrink-0 gap-2 text-xs"
-                                >
-                                    <RotateCcw className="h-3.5 w-3.5" /> Reset
-                                </Button>
-                            </div>
+                    <CardContent className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                value={search}
+                                onChange={(e) => resetPage(setSearch)(e.target.value)}
+                                placeholder="Search template by name, subject or trigger…"
+                                className="h-10 pl-9"
+                            />
                         </div>
+                        <Select value={categoryId} onValueChange={resetPage(setCategoryId)}>
+                            <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={ALL}>All Categories</SelectItem>
+                                {(notificationCategories?.data ?? []).map((c) => (
+                                    <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select value={audience} onValueChange={resetPage(setAudience)}>
+                            <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={ALL}>All Audiences</SelectItem>
+                                {AUDIENCES.map((a) => <SelectItem key={a} value={a}>{AUDIENCE_LABELS[a]}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <Select value={status} onValueChange={resetPage(setStatus)}>
+                            <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={ALL}>All Status</SelectItem>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="inactive">Inactive</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button variant="outline" onClick={clearFilters} disabled={!hasFilters} className="h-10 gap-2 text-xs">
+                            <RotateCcw className="h-3.5 w-3.5" /> Reset
+                        </Button>
                     </CardContent>
                 </Card>
 
@@ -302,165 +203,112 @@ export default function NotificationTemplatesPage() {
                         <div className="w-full overflow-x-auto">
                             <Table>
                                 <TableHeader>
-                                    <TableRow className="border-b border-border/60 hover:bg-transparent">
-                                        <TableHead className="w-12">#</TableHead>
-                                        <TableHead className="min-w-[200px]">Template Name</TableHead>
-                                        <TableHead className="whitespace-nowrap">Notification Category</TableHead>
-                                        <TableHead className="whitespace-nowrap">Event Category</TableHead>
-                                        <TableHead className="min-w-[160px]">Title</TableHead>
-                                        <TableHead className="min-w-[220px]">Content Preview</TableHead>
-                                        <TableHead className="whitespace-nowrap text-center">Status</TableHead>
+                                    <TableRow className="border-b border-border/60 bg-pink-50/60 hover:bg-pink-50/60 dark:bg-pink-950/20">
+                                        <TableHead className="min-w-[230px]">Template Name</TableHead>
+                                        <TableHead className="whitespace-nowrap">Category</TableHead>
+                                        <TableHead>Channel</TableHead>
+                                        <TableHead className="whitespace-nowrap">Audience</TableHead>
+                                        <TableHead className="whitespace-nowrap">Last Updated</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="whitespace-nowrap">Mapped Trigger</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
-
                                 <TableBody>
                                     {isLoading ? (
-                                        <TableRow>
-                                            <TableCell colSpan={8} className="py-16 text-center text-muted-foreground">
-                                                Loading templates...
-                                            </TableCell>
-                                        </TableRow>
+                                        <TableRow><TableCell colSpan={8} className="py-16 text-center text-muted-foreground">Loading templates...</TableCell></TableRow>
                                     ) : templates.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={8} className="py-16 text-center text-muted-foreground">
-                                                {hasFilters
-                                                    ? 'No templates match these filters.'
-                                                    : 'No templates yet. Click "Add Template" to create your first one.'}
+                                                {hasFilters ? 'No templates match these filters.' : 'No templates yet. Click "Create Template" to add the first one.'}
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        templates.map((row, index) => {
+                                        templates.map((row) => {
                                             const locked = !!row.has_pending_approval;
-                                            const rowNumber =
-                                                ((pagination?.page ?? 1) - 1) * (pagination?.limit ?? limit) + index + 1;
                                             const active = !!Number(row.is_active);
-
+                                            const trigger = row.trigger_key ? triggerMap.get(row.trigger_key) : undefined;
+                                            const cat = row.notificationCategory;
                                             return (
                                                 <TableRow key={row.id} className="border-b border-border/40">
-                                                    <TableCell className="text-sm text-muted-foreground">{rowNumber}</TableCell>
-
                                                     <TableCell>
-                                                        <div className="flex items-center gap-2.5">
+                                                        <button type="button" onClick={() => router.push(`${BASE}/${row.id}`)} className="flex items-center gap-2.5 text-left">
                                                             <span
                                                                 className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border"
-                                                                style={
-                                                                    row.notificationCategory?.color
-                                                                        ? { backgroundColor: `${row.notificationCategory.color}1A` }
-                                                                        : undefined
-                                                                }
+                                                                style={cat?.color ? { backgroundColor: `${cat.color}1A` } : undefined}
                                                             >
-                                                                <DynamicIcon
-                                                                    name={row.notificationCategory?.icon}
-                                                                    color={row.notificationCategory?.color}
-                                                                    size="h-3.5 w-3.5"
-                                                                />
+                                                                <DynamicIcon name={cat?.icon} color={cat?.color} size="h-3.5 w-3.5" />
                                                             </span>
-                                                            <span className="break-all text-sm font-semibold text-foreground">
-                                                                {row.name}
+                                                            <span className="min-w-0">
+                                                                <span className="block break-words text-sm font-semibold text-foreground hover:text-primary">{row.name}</span>
+                                                                <span className="block text-[11px] text-muted-foreground">{templateCode(row)}</span>
                                                             </span>
-                                                        </div>
-                                                    </TableCell>
-
-                                                    <TableCell className="text-sm text-foreground">
-                                                        {row.notificationCategory ? (
-                                                            <span
-                                                                className="inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-semibold"
-                                                                style={{
-                                                                    backgroundColor: `${row.notificationCategory.color || '#6B7280'}1A`,
-                                                                    color: row.notificationCategory.color || '#6B7280',
-                                                                }}
-                                                            >
-                                                                <DynamicIcon
-                                                                    name={row.notificationCategory.icon}
-                                                                    color={row.notificationCategory.color}
-                                                                    size="h-3 w-3"
-                                                                />
-                                                                {row.notificationCategory.name}
-                                                            </span>
-                                                        ) : (
-                                                            '—'
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell className="text-sm text-foreground">
-                                                        {row.category?.name ?? '—'}
-                                                    </TableCell>
-                                                    <TableCell className="max-w-[180px] break-all text-sm text-foreground">
-                                                        {row.title}
+                                                        </button>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <div
-                                                            role="button"
-                                                            tabIndex={0}
-                                                            onClick={() => previewTemplate(row.id)}
-                                                            className="group/preview cursor-pointer text-left focus:outline-none"
-                                                            title="Click to preview template modal"
-                                                        >
+                                                        {cat ? (
                                                             <span
-                                                                className="block max-w-xs break-all line-clamp-2 text-xs text-muted-foreground transition-colors group-hover/preview:text-primary group-hover/preview:underline"
+                                                                className="inline-flex rounded px-2 py-0.5 text-[11px] font-semibold"
+                                                                style={{ backgroundColor: `${cat.color || '#6B7280'}1A`, color: cat.color || '#6B7280' }}
                                                             >
-                                                                {row.content}
+                                                                {cat.name}
                                                             </span>
-                                                        </div>
+                                                        ) : '—'}
                                                     </TableCell>
-
-                                                    <TableCell className="text-center">
-                                                        <Switch
-                                                            checked={active}
-                                                            disabled={locked || updateStatus.isPending}
-                                                            onCheckedChange={(value) =>
-                                                                updateStatus.mutate({ id: row.id, is_active: value })
-                                                            }
-                                                            className="mx-auto"
-                                                        />
+                                                    <TableCell><ChannelIcons channels={row.channels} /></TableCell>
+                                                    <TableCell className="whitespace-nowrap text-sm">{row.audience ? AUDIENCE_LABELS[row.audience] : '—'}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{formatDateTime(row.updated_at || row.created_at)}</TableCell>
+                                                    <TableCell><StatusPill active={active} /></TableCell>
+                                                    <TableCell>
+                                                        {row.trigger_key ? (
+                                                            <span
+                                                                className="inline-flex max-w-[180px] truncate rounded-full bg-violet-50 px-2.5 py-0.5 text-[11px] font-semibold text-violet-700 dark:bg-violet-950/40 dark:text-violet-300"
+                                                                title={trigger?.label ?? row.trigger_key}
+                                                            >
+                                                                {trigger?.label ?? row.trigger_key}
+                                                            </span>
+                                                        ) : <span className="text-xs text-muted-foreground">Not mapped</span>}
                                                     </TableCell>
-
                                                     <TableCell className="text-right">
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="icon"
-                                                                    className="h-8 w-8"
-                                                                    disabled={locked}
-                                                                    title={
-                                                                        locked
-                                                                            ? 'This template has a change awaiting approval.'
-                                                                            : undefined
-                                                                    }
-                                                                >
-                                                                    <MoreVertical className="h-4 w-4" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end" className="w-52">
-                                                                <DropdownMenuItem
-                                                                    onClick={() =>
-                                                                        router.push(
-                                                                            `/admin/notifications/templates/create?id=${row.id}`
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <Pencil className="mr-2 h-4 w-4" /> Edit Template
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onClick={() => duplicateTemplate.mutate(row.id)}
-                                                                >
-                                                                    <Copy className="mr-2 h-4 w-4" /> Duplicate Template
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem onClick={() => previewTemplate(row.id)}>
-                                                                    <Eye className="mr-2 h-4 w-4" /> Preview Template
-                                                                </DropdownMenuItem>
-
-                                                                <DropdownMenuSeparator />
-
-                                                                <DropdownMenuItem
-                                                                    onClick={() => setDeleteId(row.id)}
-                                                                    className="text-destructive focus:text-destructive"
-                                                                >
-                                                                    <Trash2 className="mr-2 h-4 w-4" /> Delete Template
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
+                                                        <div className="flex items-center justify-end gap-1">
+                                                            <Button
+                                                                variant="ghost" size="icon" className="h-8 w-8" disabled={locked}
+                                                                onClick={() => router.push(`${BASE}/create?id=${row.id}`)} title="Edit Template"
+                                                            >
+                                                                <Pencil className="h-4 w-4" />
+                                                            </Button>
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button
+                                                                        variant="outline" size="icon" className="h-8 w-8" disabled={locked}
+                                                                        title={locked ? 'This template has a change awaiting approval.' : 'More actions'}
+                                                                    >
+                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end" className="w-52">
+                                                                    <DropdownMenuItem onClick={() => router.push(`${BASE}/${row.id}`)}>
+                                                                        <Eye className="mr-2 h-4 w-4" /> View Details
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem onClick={() => router.push(`${BASE}/create?id=${row.id}`)}>
+                                                                        <Pencil className="mr-2 h-4 w-4" /> Edit Template
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem onClick={() => duplicateTemplate.mutate(row.id)}>
+                                                                        <Copy className="mr-2 h-4 w-4" /> Duplicate Template
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem onClick={() => setTestId(row.id)}>
+                                                                        <Send className="mr-2 h-4 w-4" /> Send Test Message
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem onClick={() => updateStatus.mutate({ id: row.id, is_active: !active })}>
+                                                                        <Power className="mr-2 h-4 w-4" /> {active ? 'Deactivate' : 'Activate'}
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuSeparator />
+                                                                    <DropdownMenuItem onClick={() => setDeleteRow(row)} className="text-destructive focus:text-destructive">
+                                                                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </div>
                                                     </TableCell>
                                                 </TableRow>
                                             );
@@ -475,35 +323,25 @@ export default function NotificationTemplatesPage() {
                                 <TablePagination
                                     pagination={pagination}
                                     onPageChange={setPage}
-                                    onLimitChange={(v) => {
-                                        setLimit(v);
-                                        setPage(1);
-                                    }}
+                                    onLimitChange={(v) => { setLimit(v); setPage(1); }}
                                 />
                             </div>
                         )}
                     </CardContent>
                 </Card>
 
-                <TemplatePreviewModal
-                    templateId={previewId}
-                    open={previewId !== null}
-                    onOpenChange={(open) => {
-                        if (!open) handleClosePreview();
-                    }}
-                />
+                <SendTestDialog templateId={testId} open={testId !== null} onOpenChange={(o) => !o && setTestId(null)} />
 
-                <DeleteDialog
-                    open={deleteId !== null}
-                    onOpenChange={(open: boolean) => !open && setDeleteId(null)}
-                    title="Delete Notification Template"
-                    description="Are you sure you want to delete this template? This action cannot be undone."
-                    isDeleting={deleteTemplate.isPending}
-                    onConfirm={() => {
-                        if (deleteId !== null) {
-                            deleteTemplate.mutate(deleteId, { onSuccess: () => setDeleteId(null) });
-                        }
-                    }}
+                <DeleteTemplateDialog
+                    template={deleteRow}
+                    trigger={deleteRow?.trigger_key ? triggerMap.get(deleteRow.trigger_key) : undefined}
+                    busy={deleteTemplate.isPending || updateStatus.isPending}
+                    onClose={() => setDeleteRow(null)}
+                    onDeactivate={() => deleteRow && updateStatus.mutate(
+                        { id: deleteRow.id, is_active: false },
+                        { onSuccess: () => setDeleteRow({ ...deleteRow, is_active: 0 }) },
+                    )}
+                    onDelete={() => deleteRow && deleteTemplate.mutate(deleteRow.id, { onSuccess: () => setDeleteRow(null) })}
                 />
             </div>
         </PermissionGuard>

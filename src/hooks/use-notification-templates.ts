@@ -3,7 +3,16 @@ import { apiClient, isApprovalRequired } from '@/lib/api-client';
 import { toast } from '@/lib/toast';
 import type { Paginated } from '@/hooks/use-menu-management';
 
-export type NotificationChannel = 'in_app' | 'push';
+export type NotificationChannel = 'email' | 'whatsapp' | 'in_app' | 'push';
+export type TemplateAudience = 'organizer' | 'guest' | 'participant' | 'contact_person';
+export type WhatsAppCategory = 'utility' | 'authentication' | 'marketing';
+export type WhatsAppHeaderType = 'none' | 'text';
+
+export interface WhatsAppButton {
+    type: 'url' | 'copy_code';
+    text: string;
+    url: string;
+}
 
 export interface NotificationTemplate {
     id: number;
@@ -11,11 +20,29 @@ export interface NotificationTemplate {
     trigger_key: string | null;
     notification_category_id: number;
     event_category_id: number | null;
-    title: string;
-    content: string;
+    description: string | null;
+    audience: TemplateAudience | null;
+    title: string | null;
+    content: string | null;
     variables_used: string[] | null;
     image_url: string | null;
+    action_url: string | null;
     channels: NotificationChannel[];
+    email_subject: string | null;
+    email_preheader: string | null;
+    email_heading: string | null;
+    email_body: string | null;
+    email_button_label: string | null;
+    email_button_url: string | null;
+    email_footer: string | null;
+    whatsapp_template_name: string | null;
+    whatsapp_category: WhatsAppCategory | null;
+    whatsapp_header_type: WhatsAppHeaderType;
+    whatsapp_header_text: string | null;
+    whatsapp_body: string | null;
+    whatsapp_footer: string | null;
+    whatsapp_buttons: WhatsAppButton[] | null;
+    sample_values: Record<string, string> | null;
     is_active: boolean | number;
     sort_order: number;
     has_pending_approval?: boolean;
@@ -30,21 +57,87 @@ export interface NotificationVariable {
     label: string;
 }
 
+export interface TriggerSuggestion {
+    email?: {
+        subject: string; preheader: string; heading: string; body: string;
+        button_label: string; button_url: string; footer: string;
+    };
+    whatsapp?: {
+        template_name: string; category: WhatsAppCategory; header_type: WhatsAppHeaderType;
+        header_text: string; body: string; footer: string; buttons: WhatsAppButton[];
+    };
+    in_app?: { title: string; content: string };
+}
+
+/** One row of the Transactional Notifications sheet (backend notificationCatalog.json). */
 export interface SystemTrigger {
     key: string;
     label: string;
+    section: string;
+    audience: TemplateAudience;
+    also?: TemplateAudience[];
+    /** Channels Jamal ticked for this trigger. */
+    channels: NotificationChannel[];
+    /** true = the system already fires this trigger today. */
+    live: boolean;
+    variables: string[];
+    suggested: TriggerSuggestion | null;
+}
+
+export interface TriggerSection {
+    code: string;
+    name: string;
+    to: string;
+}
+
+export interface TemplateCounts {
+    all: number;
+    email: number;
+    whatsapp: number;
+    in_app: number;
+}
+
+export interface TestSendPayload {
+    channels: NotificationChannel[];
+    email?: string;
+    dial_code?: string;
+    mobile?: string;
+    sample_values?: Record<string, string>;
+}
+
+export interface TestSendResult {
+    status: 'sent' | 'failed' | 'skipped';
+    message: string;
 }
 
 export type NotificationTemplatePayload = {
     name: string;
+    description?: string | null;
     trigger_key?: string | null;
+    audience?: TemplateAudience | null;
     notification_category_id: number;
     event_category_id?: number | null;
-    title: string;
-    content: string;
+    title?: string | null;
+    content?: string | null;
     image_url?: string | null;
+    action_url?: string | null;
     channels?: NotificationChannel[];
     is_active?: boolean | number;
+    email_subject?: string | null;
+    email_preheader?: string | null;
+    email_heading?: string | null;
+    email_body?: string | null;
+    email_button_label?: string | null;
+    email_button_url?: string | null;
+    email_footer?: string | null;
+    whatsapp_template_name?: string | null;
+    whatsapp_category?: WhatsAppCategory | null;
+    whatsapp_header_type?: WhatsAppHeaderType;
+    whatsapp_header_text?: string | null;
+    whatsapp_body?: string | null;
+    whatsapp_footer?: string | null;
+    whatsapp_buttons?: WhatsAppButton[] | null;
+    sample_values?: Record<string, string> | null;
 };
 
 const KEY = ['notification-templates'];
@@ -65,9 +158,20 @@ const api = {
         const response = await apiClient.get('/notification-templates/variables');
         return response.data.data?.variables ?? [];
     },
-    getSystemTriggers: async (): Promise<SystemTrigger[]> => {
+    getSystemTriggers: async (): Promise<{ triggers: SystemTrigger[]; sections: TriggerSection[] }> => {
         const response = await apiClient.get('/notification-templates/system-triggers');
-        return response.data.data?.triggers ?? [];
+        return {
+            triggers: response.data.data?.triggers ?? [],
+            sections: response.data.data?.sections ?? [],
+        };
+    },
+    getCounts: async (): Promise<TemplateCounts> => {
+        const response = await apiClient.get('/notification-templates/counts');
+        return response.data.data?.counts ?? { all: 0, email: 0, whatsapp: 0, in_app: 0 };
+    },
+    testSend: async ({ id, data }: { id: number; data: TestSendPayload }): Promise<Record<string, TestSendResult>> => {
+        const response = await apiClient.post(`/notification-templates/${id}/test-send`, data);
+        return response.data.data?.results ?? {};
     },
     create: async (data: NotificationTemplatePayload): Promise<NotificationTemplate> => {
         const response = await apiClient.post('/notification-templates', data);
@@ -127,6 +231,23 @@ export function useSystemTriggers() {
         queryKey: ['notification-templates', 'system-triggers'],
         queryFn: api.getSystemTriggers,
         staleTime: Infinity,
+    });
+}
+
+export function useNotificationTemplateCounts() {
+    return useQuery({
+        queryKey: [...KEY, 'counts'],
+        queryFn: api.getCounts,
+    });
+}
+
+/** Sends to test recipients only; the result says per channel what happened. */
+export function useTestSendNotificationTemplate() {
+    return useMutation({
+        mutationFn: api.testSend,
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || 'Failed to send the test message');
+        },
     });
 }
 

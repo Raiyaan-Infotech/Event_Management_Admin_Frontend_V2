@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useNotificationTemplate, useSystemTriggers } from '@/hooks/use-notification-templates';
 import {
     AUDIENCE_LABELS,
+    CategoryPill,
     EmailPreview,
     InAppPreview,
     MAIN_CHANNELS,
@@ -86,7 +87,7 @@ export default function TemplateDetailsPage() {
                                         <InfoCard title="Template Information" rows={[
                                             ['Template Name', t.name],
                                             ['Template ID', templateCode(t)],
-                                            ['Category', t.notificationCategory?.name ?? '—'],
+                                            ['Category', <CategoryPill key="c" type={t.template_type} />],
                                             ['Audience', t.audience ? AUDIENCE_LABELS[t.audience] : '—'],
                                             ['Status', <StatusPill key="s" active={!!Number(t.is_active)} />],
                                             ['Last Updated', formatDateTime(t.updated_at || t.created_at)],

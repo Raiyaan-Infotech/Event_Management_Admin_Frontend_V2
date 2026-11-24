@@ -34,7 +34,6 @@ import { mediaApi } from '@/hooks/use-media';
 import { PageLoader } from '@/components/common/page-loader';
 import { PermissionGuard } from '@/components/guards/permission-guard';
 import { cn } from '@/lib/utils';
-import { useNotificationCategories } from '@/hooks/use-notification-categories';
 import {
     useNotificationTemplate,
     useNotificationVariables,
@@ -46,6 +45,7 @@ import {
     type NotificationTemplatePayload,
     type SystemTrigger,
     type TemplateAudience,
+    type TemplateType,
     type WhatsAppButton,
     type WhatsAppCategory,
     type WhatsAppHeaderType,
@@ -55,6 +55,8 @@ import {
     EmailPreview,
     InAppPreview,
     MAIN_CHANNELS,
+    TEMPLATE_TYPES,
+    TEMPLATE_TYPE_LABELS,
     WA_CATEGORY_LABELS,
     WhatsAppPreview,
     humanize,
@@ -88,6 +90,7 @@ const STEP_LABELS: Record<StepKey, string> = {
 interface FormState {
     name: string;
     description: string;
+    template_type: TemplateType | '';
     notification_category_id: string;
     event_category_id: string;
     audience: TemplateAudience | '';
@@ -117,7 +120,7 @@ interface FormState {
 }
 
 const emptyForm = (): FormState => ({
-    name: '', description: '', notification_category_id: '', event_category_id: '', audience: '',
+    name: '', description: '', template_type: 'transactional', notification_category_id: '', event_category_id: '', audience: '',
     trigger_key: '', is_active: true, channels: ['email'], push: true,
     email_subject: '', email_preheader: '', email_heading: '', email_body: '',
     email_button_label: '', email_button_url: '', email_footer: '',
@@ -129,6 +132,7 @@ const emptyForm = (): FormState => ({
 const fromTemplate = (t: NotificationTemplate): FormState => ({
     name: t.name ?? '',
     description: t.description ?? '',
+    template_type: t.template_type ?? 'transactional',
     notification_category_id: t.notification_category_id ? String(t.notification_category_id) : '',
     event_category_id: t.event_category_id ? String(t.event_category_id) : '',
     audience: t.audience ?? '',
@@ -175,7 +179,6 @@ export function TemplateWizardContent() {
     const [created, setCreated] = useState<NotificationTemplate | null>(null);
 
     const { data: existing, isLoading: loadingExisting } = useNotificationTemplate(id ?? undefined);
-    const { data: notificationCategories } = useNotificationCategories({ limit: 200, is_active: true });
     const { data: allVariables } = useNotificationVariables();
     const { data: catalog } = useSystemTriggers();
 
@@ -282,7 +285,7 @@ export function TemplateWizardContent() {
         const e: Record<string, string> = {};
         if (key === 'basic') {
             if (!form.name.trim()) e.name = 'Enter a template name.';
-            if (!form.notification_category_id) e.notification_category_id = 'Pick a category.';
+            if (!form.template_type) e.template_type = 'Pick a category.';
             if (!form.channels.length) e.channels = 'Pick at least one channel.';
         }
         if (key === 'email') {
@@ -349,7 +352,8 @@ export function TemplateWizardContent() {
         return {
             name: form.name.trim(),
             description: form.description.trim() || null,
-            notification_category_id: Number(form.notification_category_id),
+            template_type: form.template_type || 'transactional',
+            notification_category_id: form.notification_category_id ? Number(form.notification_category_id) : null,
             event_category_id: form.event_category_id ? Number(form.event_category_id) : null,
             audience: trigger?.audience ?? (form.trigger_key ? form.audience || null : null),
             trigger_key: form.trigger_key || null,
@@ -397,7 +401,7 @@ export function TemplateWizardContent() {
         else createTemplate.mutate(payload);
     };
 
-    const categoryName = notificationCategories?.data?.find((c) => String(c.id) === form.notification_category_id)?.name ?? '—';
+    const categoryName = form.template_type ? TEMPLATE_TYPE_LABELS[form.template_type] : '—';
     const sections = catalog?.sections ?? [];
 
     if (created) {
@@ -443,11 +447,11 @@ export function TemplateWizardContent() {
                                         <Field label="Template Name" required error={errors.name}>
                                             <Input value={form.name} onChange={(e) => setField('name', e.target.value.slice(0, 150))} placeholder="e.g. Booking Confirmation" className={cn('h-10', errors.name && 'border-destructive')} />
                                         </Field>
-                                        <Field label="Category" required error={errors.notification_category_id}>
-                                            <Select value={form.notification_category_id} onValueChange={(v) => setField('notification_category_id', v)}>
-                                                <SelectTrigger className={cn('h-10', errors.notification_category_id && 'border-destructive')}><SelectValue placeholder="Select category" /></SelectTrigger>
+                                        <Field label="Category" required error={errors.template_type}>
+                                            <Select value={form.template_type} onValueChange={(v) => setField('template_type', v as TemplateType)}>
+                                                <SelectTrigger className={cn('h-10', errors.template_type && 'border-destructive')}><SelectValue placeholder="Select category" /></SelectTrigger>
                                                 <SelectContent>
-                                                    {(notificationCategories?.data ?? []).map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+                                                    {TEMPLATE_TYPES.map((t) => <SelectItem key={t} value={t}>{TEMPLATE_TYPE_LABELS[t]}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         </Field>
@@ -806,7 +810,7 @@ function SuccessScreen({ template, trigger, categoryName, onList, onAnother }: {
     const cards: [typeof Users, string, string][] = [
         [Users, 'Audience', template.audience ? AUDIENCE_LABELS[template.audience] : '—'],
         [Mail, 'Channels', MAIN_CHANNELS.filter((c) => template.channels.includes(c.key)).map((c) => c.label).join(' / ')],
-        [Tag, 'Category', categoryName],
+        [Tag, 'Category', TEMPLATE_TYPE_LABELS[template.template_type] ?? categoryName],
     ];
     return (
         <div className="space-y-5">

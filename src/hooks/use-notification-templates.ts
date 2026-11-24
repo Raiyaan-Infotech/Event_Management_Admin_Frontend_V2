@@ -4,6 +4,7 @@ import { toast } from '@/lib/toast';
 import type { Paginated } from '@/hooks/use-menu-management';
 
 export type NotificationChannel = 'email' | 'whatsapp' | 'in_app' | 'push';
+export type TemplateType = 'transactional' | 'campaign' | 'custom';
 export type TemplateAudience = 'organizer' | 'guest' | 'participant' | 'contact_person';
 export type WhatsAppCategory = 'utility' | 'authentication' | 'marketing';
 export type WhatsAppHeaderType = 'none' | 'text';
@@ -17,8 +18,9 @@ export interface WhatsAppButton {
 export interface NotificationTemplate {
     id: number;
     name: string;
+    template_type: TemplateType;
     trigger_key: string | null;
-    notification_category_id: number;
+    notification_category_id: number | null;
     event_category_id: number | null;
     description: string | null;
     audience: TemplateAudience | null;
@@ -95,6 +97,9 @@ export interface TemplateCounts {
     email: number;
     whatsapp: number;
     in_app: number;
+    transactional: number;
+    campaign: number;
+    custom: number;
 }
 
 export interface TestSendPayload {
@@ -112,10 +117,11 @@ export interface TestSendResult {
 
 export type NotificationTemplatePayload = {
     name: string;
+    template_type: TemplateType;
     description?: string | null;
     trigger_key?: string | null;
     audience?: TemplateAudience | null;
-    notification_category_id: number;
+    notification_category_id?: number | null;
     event_category_id?: number | null;
     title?: string | null;
     content?: string | null;
@@ -167,7 +173,7 @@ const api = {
     },
     getCounts: async (): Promise<TemplateCounts> => {
         const response = await apiClient.get('/notification-templates/counts');
-        return response.data.data?.counts ?? { all: 0, email: 0, whatsapp: 0, in_app: 0 };
+        return response.data.data?.counts ?? { all: 0, email: 0, whatsapp: 0, in_app: 0, transactional: 0, campaign: 0, custom: 0 };
     },
     testSend: async ({ id, data }: { id: number; data: TestSendPayload }): Promise<Record<string, TestSendResult>> => {
         const response = await apiClient.post(`/notification-templates/${id}/test-send`, data);

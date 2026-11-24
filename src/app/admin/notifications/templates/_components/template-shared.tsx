@@ -6,6 +6,7 @@ import type {
     NotificationChannel,
     NotificationTemplate,
     TemplateAudience,
+    TemplateType,
     WhatsAppButton,
     WhatsAppHeaderType,
 } from '@/hooks/use-notification-templates';
@@ -20,6 +21,24 @@ export const AUDIENCE_LABELS: Record<TemplateAudience, string> = {
 };
 
 export const AUDIENCES = Object.keys(AUDIENCE_LABELS) as TemplateAudience[];
+
+/** The mockup's three categories. */
+export const TEMPLATE_TYPE_LABELS: Record<TemplateType, string> = {
+    transactional: 'Transactional',
+    campaign: 'Campaign',
+    custom: 'Custom',
+};
+export const TEMPLATE_TYPES = Object.keys(TEMPLATE_TYPE_LABELS) as TemplateType[];
+const TYPE_TONE: Record<TemplateType, string> = {
+    transactional: 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300',
+    campaign: 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300',
+    custom: 'bg-pink-50 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
+};
+
+export function CategoryPill({ type }: { type?: TemplateType | null }) {
+    const t = type ?? 'transactional';
+    return <span className={cn('inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold', TYPE_TONE[t])}>{TEMPLATE_TYPE_LABELS[t]}</span>;
+}
 
 /** The three channel cards (push is a toggle inside In-app). */
 export const MAIN_CHANNELS: { key: NotificationChannel; label: string; hint: string; icon: typeof Mail; tone: string }[] = [

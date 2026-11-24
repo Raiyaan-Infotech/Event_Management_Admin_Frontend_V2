@@ -36,7 +36,6 @@ import { PermissionGuard } from '@/components/guards/permission-guard';
 import { DynamicIcon } from '@/components/common/dynamic-icon';
 import { cn } from '@/lib/utils';
 import { useQueryParam } from '@/lib/client-only';
-import { useNotificationCategories } from '@/hooks/use-notification-categories';
 import {
     useNotificationTemplates,
     useNotificationTemplateCounts,
@@ -46,7 +45,7 @@ import {
     useDeleteNotificationTemplate,
     type NotificationTemplate,
 } from '@/hooks/use-notification-templates';
-import { AUDIENCES, AUDIENCE_LABELS, ChannelIcons, formatDateTime, templateCode } from './_components/template-shared';
+import { AUDIENCES, AUDIENCE_LABELS, CategoryPill, ChannelIcons, TEMPLATE_TYPES, TEMPLATE_TYPE_LABELS, formatDateTime, templateCode } from './_components/template-shared';
 import { SendTestDialog, StatusPill } from './_components/send-test-dialog';
 import { DeleteTemplateDialog } from './_components/delete-template-dialog';
 
@@ -58,7 +57,11 @@ const CHANNEL_TABS = [
     { key: 'email', label: 'Email', icon: Mail, count: 'email' },
     { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, count: 'whatsapp' },
     { key: 'in_app', label: 'In-App (Push)', icon: Bell, count: 'in_app' },
+    { key: 'transactional', label: 'Transactional', icon: Layers, count: 'transactional' },
+    { key: 'campaign', label: 'Campaign', icon: Send, count: 'campaign' },
+    { key: 'custom', label: 'Custom', icon: Pencil, count: 'custom' },
 ] as const;
+const TYPE_TABS: string[] = ['transactional', 'campaign', 'custom'];
 
 export default function NotificationTemplatesPage() {
     const router = useRouter();
@@ -81,7 +84,6 @@ export default function NotificationTemplatesPage() {
     const [deleteRow, setDeleteRow] = useState<NotificationTemplate | null>(null);
     const [testId, setTestId] = useState<number | null>(null);
 
-    const { data: notificationCategories } = useNotificationCategories({ limit: 200, is_active: true });
     const { data: counts } = useNotificationTemplateCounts();
     const { data: catalog } = useSystemTriggers();
     const triggerMap = useMemo(() => new Map((catalog?.triggers ?? []).map((t) => [t.key, t])), [catalog]);
@@ -90,8 +92,8 @@ export default function NotificationTemplatesPage() {
         page,
         limit,
         search: search || undefined,
-        channel: channel === ALL ? undefined : channel,
-        notification_category_id: categoryId === ALL ? undefined : categoryId,
+        channel: channel === ALL || TYPE_TABS.includes(channel) ? undefined : channel,
+        template_type: TYPE_TABS.includes(channel) ? channel : categoryId === ALL ? undefined : categoryId,
         audience: audience === ALL ? undefined : audience,
         is_active: status === ALL ? undefined : status === 'active',
         sort_by: 'updated_at',
@@ -172,9 +174,7 @@ export default function NotificationTemplatesPage() {
                             <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value={ALL}>All Categories</SelectItem>
-                                {(notificationCategories?.data ?? []).map((c) => (
-                                    <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
-                                ))}
+                                {TEMPLATE_TYPES.map((t) => <SelectItem key={t} value={t}>{TEMPLATE_TYPE_LABELS[t]}</SelectItem>)}
                             </SelectContent>
                         </Select>
                         <Select value={audience} onValueChange={resetPage(setAudience)}>
@@ -246,14 +246,7 @@ export default function NotificationTemplatesPage() {
                                                         </button>
                                                     </TableCell>
                                                     <TableCell>
-                                                        {cat ? (
-                                                            <span
-                                                                className="inline-flex rounded px-2 py-0.5 text-[11px] font-semibold"
-                                                                style={{ backgroundColor: `${cat.color || '#6B7280'}1A`, color: cat.color || '#6B7280' }}
-                                                            >
-                                                                {cat.name}
-                                                            </span>
-                                                        ) : '—'}
+                                                        <CategoryPill type={row.template_type} />
                                                     </TableCell>
                                                     <TableCell><ChannelIcons channels={row.channels} /></TableCell>
                                                     <TableCell className="whitespace-nowrap text-sm">{row.audience ? AUDIENCE_LABELS[row.audience] : '—'}</TableCell>

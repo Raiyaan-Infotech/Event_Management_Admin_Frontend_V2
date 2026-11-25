@@ -263,7 +263,7 @@ export function OtpTab({ value, onChange, dlt }: TabProps<Msg91Otp> & { dlt: Msg
                     <Field label="Sender ID (OTP)" required info="Approved OTP / Transactional senders from the DLT Entity & Sender tab.">
                         <SelectInput value={value.sender_id} onChange={(v) => set('sender_id', v)} options={oOpts} placeholder={oOpts.length ? 'Select sender' : 'No approved sender yet'} />
                     </Field>
-                    <Field label="MSG91 OTP Template ID" required hint="MSG91 → OTP → Templates. The ID MSG91 gives the template (not the DLT number).">
+                    <Field label="MSG91 OTP Template ID (SMS)" required hint="MSG91 → SMS → Templates: the Template ID of the OTP SMS (not the DLT number). Used to send OTP by SMS.">
                         <TextInput value={value.msg91_template_id} maxLength={40} placeholder="e.g. 6654321a1b2c3d4e5f" onChange={(e) => set('msg91_template_id', e.target.value)} />
                     </Field>
                     <Field label="DLT Template ID" required hint="The number the DLT portal gave this OTP text.">
@@ -282,6 +282,28 @@ export function OtpTab({ value, onChange, dlt }: TabProps<Msg91Otp> & { dlt: Msg
                 <div className={grid2}>
                     <ToggleRow checked={value.sms_enabled} onChange={(v) => set('sms_enabled', v)} title="Enable SMS OTP" hint="Send OTP by SMS using MSG91." />
                     <ToggleRow checked={value.whatsapp_fallback} onChange={(v) => set('whatsapp_fallback', v)} title="WhatsApp OTP Fallback (Optional)" hint="If the SMS isn't received within the resend interval, the OTP can be sent on WhatsApp." />
+                </div>
+            </Section>
+
+            <Section title="WhatsApp OTP (via MSG91)" hint="MSG91 → WhatsApp. Needed to send OTPs on WhatsApp through MSG91.">
+                <div className={grid2}>
+                    <Field label="MSG91 WhatsApp Number" required hint="WhatsApp → Numbers. Country code + number, digits only.">
+                        <TextInput value={value.wa_number} inputMode="numeric" maxLength={15} placeholder="e.g. 15559914712" onChange={(e) => set('wa_number', e.target.value.replace(/\D/g, ''))} />
+                    </Field>
+                    <Field label="WhatsApp OTP Template Name" required hint="WhatsApp → Templates. The approved Authentication template, exactly as named.">
+                        <TextInput className="font-mono text-[12.5px]" value={value.wa_template} maxLength={512} placeholder="e.g. otp_verify_app" onChange={(e) => set('wa_template', e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))} />
+                    </Field>
+                    <Field label="Template Language">
+                        <SelectInput value={value.wa_language} onChange={(v) => set('wa_language', v as Msg91Otp['wa_language'])} options={[
+                            { value: 'en', label: 'English (en)' }, { value: 'en_US', label: 'English US (en_US)' }, { value: 'en_GB', label: 'English UK (en_GB)' },
+                            { value: 'ta', label: 'Tamil (ta)' }, { value: 'hi', label: 'Hindi (hi)' }, { value: 'ml', label: 'Malayalam (ml)' },
+                            { value: 'te', label: 'Telugu (te)' }, { value: 'kn', label: 'Kannada (kn)' },
+                        ]} />
+                    </Field>
+                    <Field label="Template Namespace (Optional)" hint="Only older WhatsApp accounts need it. Leave empty otherwise.">
+                        <TextInput value={value.wa_namespace} maxLength={64} onChange={(e) => set('wa_namespace', e.target.value.trim())} />
+                    </Field>
+                    <ToggleRow checked={value.wa_copy_button} onChange={(v) => set('wa_copy_button', v)} title="Template has a Copy-code button" hint="Turn on if the template shows a “Copy code” button (Authentication templates usually do)." />
                 </div>
             </Section>
 

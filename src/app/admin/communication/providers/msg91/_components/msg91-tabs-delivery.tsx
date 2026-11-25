@@ -8,8 +8,9 @@ import {
 import { toast } from '@/lib/toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { useMsg91TestSend } from '@/hooks/use-msg91-config';
 import type {
-    EmailTemplateMap, Msg91Alerts, Msg91Config, Msg91Dlt, Msg91Email, Msg91Webhook, SmsTemplate, WebhookEvent,
+    EmailTemplateMap, Msg91Alerts, Msg91Config, Msg91TestSendResult, Msg91Dlt, Msg91Email, Msg91Webhook, SmsTemplate, WebhookEvent,
 } from '@/hooks/use-msg91-config';
 import {
     Check, Field, InfoNote, LANG_OPTIONS, NumberInput, Pill, Section, SelectInput, TextInput, Toggle, ToggleRow,
@@ -460,22 +461,86 @@ export function BalanceTab({ value, onChange, status, onRefresh, refreshing }: T
 export function TestTab({ config, onTest, testing }: { config: Msg91Config; onTest: () => void; testing: boolean }) {
     const s = config.status;
     const ok = s.connection_status === 'connected';
+    const send = useMsg91TestSend();
+    const [channel, setChannel] = React.useState<'whatsapp' | 'sms'>('whatsapp');
+    const [dial, setDial] = React.useState('91');
+    const [mobile, setMobile] = React.useState('');
+    const [history, setHistory] = React.useState<Msg91TestSendResult[]>([]);
+    const o = config.otp;
+    const ready = channel === 'sms' ? Boolean(o.msg91_template_id) : Boolean(o.wa_number && o.wa_template);
     const checks = [
         { label: 'Auth key saved', pass: Boolean(config.api.has_auth_key) },
         { label: 'DLT entity ID', pass: Boolean(config.dlt.entity_id) },
         { label: 'At least one approved sender ID', pass: config.dlt.senders.some((x) => x.status === 'approved') },
         { label: 'OTP: MSG91 template + DLT template ID', pass: Boolean(config.otp.msg91_template_id && config.otp.dlt_template_id) },
+        { label: 'WhatsApp OTP: number + template', pass: Boolean(o.wa_number && o.wa_template) },
         { label: 'Email domain verified', pass: config.email.domain_status === 'verified' },
     ];
+    const onSend = () => send.mutate({ channel, dial_code: dial, mobile }, { onSuccess: (r) => setHistory((h) => [r, ...h].slice(0, 10)) });
     return (
         <div className="space-y-4">
+            <Section title="Send Test Message" hint="Sends ONE real OTP using the settings saved on this page. Uses 1 MSG91 credit. Save your changes first.">
+                <div className="mb-3 inline-flex rounded-lg border border-slate-200 p-1 dark:border-slate-800">
+                    {([['whatsapp', 'WhatsApp OTP'], ['sms', 'SMS OTP']] as const).map(([k, l]) => (
+                        <button key={k} type="button" onClick={() => setChannel(k)}
+                            className={cn('rounded-md px-4 py-1.5 text-[13px] font-semibold', channel === k ? 'bg-sky-600 text-white' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900')}>
+                            {l}
+                        </button>
+                    ))}
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <Field label="Recipient Mobile Number" required>
+                        <div className="flex gap-2">
+                            <SelectInput className="w-24" value={dial} onChange={setDial} options={[{ value: '91', label: '+91' }, { value: '1', label: '+1' }, { value: '971', label: '+971' }, { value: '65', label: '+65' }, { value: '44', label: '+44' }]} />
+                            <TextInput inputMode="numeric" maxLength={12} placeholder="98765 43210" value={mobile} onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))} />
+                        </div>
+                    </Field>
+                    <Field label="Uses (saved settings)">
+                        <div className="rounded-lg bg-slate-50 px-3 py-2 text-[12.5px] text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                            {channel === 'whatsapp'
+                                ? (ready ? <>Number <b>{o.wa_number}</b> · template <b className="font-mono">{o.wa_template}</b> ({o.wa_language})</> : 'Add the MSG91 WhatsApp number and OTP template on the OTP Configuration tab.')
+                                : (ready ? <>SMS template <b className="font-mono">{o.msg91_template_id}</b> · variable <b>{o.otp_variable}</b></> : 'Add the MSG91 SMS template ID on the OTP Configuration tab.')}
+                        </div>
+                    </Field>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-[12px] text-slate-500">A random 6-digit code is sent so you can match the message. On/off switches are ignored for tests.</p>
+                    <button type="button" disabled={!ready || mobile.length < 6 || send.isPending} onClick={onSend}
+                        className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50">
+                        {send.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Send Test {channel === 'sms' ? 'SMS' : 'WhatsApp'}
+                    </button>
+                </div>
+                {history.length > 0 && (
+                    <div className="mt-4 overflow-x-auto">
+                        <table className="w-full text-[12.5px]">
+                            <thead>
+                                <tr className="border-b border-slate-200 bg-slate-50 text-left text-[12px] font-semibold text-slate-600 dark:border-slate-800 dark:bg-slate-900">
+                                    <th className="px-2 py-2">Time</th><th className="px-2 py-2">Channel</th><th className="px-2 py-2">Recipient</th><th className="px-2 py-2">Code</th><th className="px-2 py-2">Result</th><th className="px-2 py-2">MSG91 reply</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {history.map((h) => (
+                                    <tr key={h.sent_at} className="border-b border-slate-100 last:border-0 dark:border-slate-900">
+                                        <td className="px-2 py-2">{formatDateTime(h.sent_at)}</td>
+                                        <td className="px-2 py-2">{h.channel === 'sms' ? 'SMS' : 'WhatsApp'}</td>
+                                        <td className="px-2 py-2">{h.to}</td>
+                                        <td className="px-2 py-2 font-mono font-semibold">{h.code || '—'}</td>
+                                        <td className="px-2 py-2">{h.ok ? <Pill tone="green"><CheckCircle2 className="h-3 w-3" />Accepted</Pill> : <Pill tone="red"><XCircle className="h-3 w-3" />Refused</Pill>}</td>
+                                        <td className="max-w-[260px] truncate px-2 py-2 font-mono text-[11.5px] text-slate-500" title={h.reply}>{h.reply}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <p className="mt-1 text-[11.5px] text-slate-500">&quot;Accepted&quot; means MSG91 took the message; the phone shows it a few seconds later. Only this visit&apos;s tests are listed.</p>
+                    </div>
+                )}
+            </Section>
+
             <Section title="Run Connection Test" hint="Checks the saved auth key with MSG91 and reads the balance. Nothing is sent and no credit is used.">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <FlaskConical className="h-8 w-8 text-sky-600" />
-                        <div className="text-[13px] text-slate-600 dark:text-slate-300">
-                            Test messages (SMS / OTP / Email) are added with the sending step, so they use these saved settings.
-                        </div>
+                        <div className="text-[13px] text-slate-600 dark:text-slate-300">Confirms MSG91 accepts the saved auth key.</div>
                     </div>
                     <button type="button" disabled={testing} onClick={onTest} className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-sky-700 disabled:opacity-60">
                         {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Run Test

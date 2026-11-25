@@ -59,6 +59,11 @@ export interface Msg91Otp {
     rate_limit_per_hour: number;
     lockout_enabled: boolean;
     lockout_minutes: number;
+    wa_number: string;
+    wa_template: string;
+    wa_language: 'en' | 'en_US' | 'en_GB' | 'ta' | 'hi' | 'ml' | 'te' | 'kn';
+    wa_namespace: string;
+    wa_copy_button: boolean;
 }
 export type ChannelUse = 'T' | 'P' | 'S' | 'O';
 export interface DltSender {
@@ -193,6 +198,29 @@ export function useRegenerateMsg91WebhookToken() {
         onSuccess: (config) => {
             qc.setQueryData(KEY, config);
             toast.success('New webhook token created. Update the URLs in MSG91.');
+        },
+        onError: (err) => { toast.error(errorText(err)); },
+    });
+}
+
+export interface Msg91TestSendResult {
+    channel: 'sms' | 'whatsapp';
+    to: string;
+    ok: boolean;
+    code: string | null;
+    http_status: number | null;
+    reply: string;
+    sent_at: string;
+}
+
+/** Sends ONE real test OTP with the saved settings (uses 1 MSG91 credit). */
+export function useMsg91TestSend() {
+    return useMutation({
+        mutationFn: async (body: { channel: 'sms' | 'whatsapp'; dial_code: string; mobile: string }) =>
+            (await apiClient.post('/msg91-config/test-send', body))?.data?.data?.result as Msg91TestSendResult,
+        onSuccess: (r) => {
+            if (r.ok) toast.success(`Test ${r.channel === 'sms' ? 'SMS' : 'WhatsApp'} accepted by MSG91`);
+            else toast.error(r.reply || 'MSG91 refused the message');
         },
         onError: (err) => { toast.error(errorText(err)); },
     });

@@ -88,6 +88,7 @@ export default function Breadcrumb() {
 
     if (segment === "providers" && segments[index - 1] === "communication") return "Provider Management";
     if (segment === "msg91") return "MSG91";
+    if (segment === "whatsapp" && segments[index - 1] === "providers") return "Meta WhatsApp";
     if (segment === "home-screen-templates") return "Home Screen Templates";
     if (segment === "categories" && segments[index - 1] === "home-screen-templates") return "Home Screen Categories";
 

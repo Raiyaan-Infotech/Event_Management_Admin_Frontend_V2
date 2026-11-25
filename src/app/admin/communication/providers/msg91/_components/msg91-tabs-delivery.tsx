@@ -14,7 +14,7 @@ import type {
 import {
     Check, Field, InfoNote, LANG_OPTIONS, NumberInput, Pill, Section, SelectInput, TextInput, Toggle, ToggleRow,
     formatDateTime, grid2, grid3,
-} from './msg91-ui';
+} from '../../_components/provider-ui';
 import { senderOptions } from './msg91-tabs-setup';
 
 type TabProps<T> = { value: T; onChange: (next: T) => void };

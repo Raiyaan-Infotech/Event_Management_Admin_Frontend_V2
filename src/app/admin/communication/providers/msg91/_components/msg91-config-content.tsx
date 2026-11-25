@@ -12,7 +12,7 @@ import {
     useMsg91Config, useRegenerateMsg91WebhookToken, useSaveMsg91Section, useTestMsg91Connection,
     type Msg91Config, type Msg91Section,
 } from '@/hooks/use-msg91-config';
-import { Pill, SideCard, formatDateTime } from './msg91-ui';
+import { Pill, SideCard, formatDateTime } from '../../_components/provider-ui';
 import { ApiTab, DltTab, GeneralTab, OtpTab, SmsTab } from './msg91-tabs-setup';
 import { BalanceTab, EmailTab, TemplateMappingTab, TestTab, WebhookTab } from './msg91-tabs-delivery';
 

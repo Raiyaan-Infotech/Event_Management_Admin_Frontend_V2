@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-/* Small building blocks in the style of the MSG91 Config designs (Downloads\20261125_…\MSG91 Config). */
+/* Shared building blocks for the provider settings pages (MSG91, WhatsApp), in the style of the 20261125 designs. */
 
 export const LANG_OPTIONS = [
     { value: 'en', label: 'English' },

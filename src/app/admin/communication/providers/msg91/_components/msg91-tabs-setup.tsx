@@ -8,7 +8,7 @@ import type {
 import {
     Check, Field, InfoNote, LANG_OPTIONS, NumberInput, Pill, Radio, Section, SelectInput, TextArea, TextInput,
     Toggle, ToggleRow, grid2, grid3, grid4,
-} from './msg91-ui';
+} from '../../_components/provider-ui';
 
 type TabProps<T> = { value: T; onChange: (next: T) => void };
 

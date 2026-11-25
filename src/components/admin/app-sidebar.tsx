@@ -255,6 +255,7 @@ const menuItems: MenuItem[] = [
     children: [
       { labelKey: "Push Notifications", href: "/admin/settings/push-notifications", icon: Bell, permission: "settings.view" },
       { labelKey: "MSG91 Provider", href: "/admin/communication/providers/msg91", icon: MessageSquare, permission: "settings.view" },
+      { labelKey: "WhatsApp Provider", href: "/admin/communication/providers/whatsapp", icon: MessageCircle, permission: "settings.view" },
       { labelKey: "nav.support", href: "/admin/support", icon: MessageCircle, permission: "support.view" },
       { labelKey: "nav.contact", href: "/admin/contact", icon: Phone, permission: "contact.view" },
     ],
